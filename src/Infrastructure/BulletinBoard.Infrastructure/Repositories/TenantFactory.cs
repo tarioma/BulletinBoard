@@ -12,7 +12,7 @@ public class TenantFactory : ITenantFactory
     {
         Guard.Against.Null(context);
 
-        _tenant = new Lazy<ITenant>(new Tenant(context));
+        _tenant = new Lazy<ITenant>(() => new Tenant(context));
     }
 
     public ITenant GetTenant() => _tenant.Value;
