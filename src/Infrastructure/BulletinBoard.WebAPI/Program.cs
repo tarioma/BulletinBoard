@@ -23,6 +23,16 @@ builder.Services
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        b =>
+        {
+            b.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(connectionString));
@@ -52,6 +62,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseCors("AllowAllOrigins");
 app.MapControllers();
 app.UseStaticFiles();
 app.UseExceptionHandler();
