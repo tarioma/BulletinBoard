@@ -8,7 +8,6 @@ using BulletinBoard.Infrastructure.Repositories;
 using BulletinBoard.WebAPI.Services;
 using BulletinBoard.WebAPI.Tools;
 using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -46,16 +45,18 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
+app.UseCors("AllowAllOrigins");
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/swagger.json", "v1");
-        options.DocExpansion(DocExpansion.List);
-    });
+    app.UseSwaggerUI();
+    // app.UseSwaggerUI(options =>
+    // {
+    //     //options.SwaggerEndpoint("/swagger/swagger.json", "v1");
+    //     //options.DocExpansion(DocExpansion.List);
+    // });
 }
 else
 {
@@ -63,7 +64,6 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseCors("AllowAllOrigins");
 app.MapControllers();
 app.UseStaticFiles();
 app.UseExceptionHandler();

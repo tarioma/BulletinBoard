@@ -48,7 +48,6 @@ public class BulletinsController : ControllerBase
         var query = new GetBulletinByIdQuery(id);
         var bulletin = await _mediator.Send(query, cancellationToken);
         var response = _mapper.Map<GetBulletinByIdResponse>(bulletin);
-        Console.WriteLine(response.ImagePreview);
 
         return Ok(response);
     }
