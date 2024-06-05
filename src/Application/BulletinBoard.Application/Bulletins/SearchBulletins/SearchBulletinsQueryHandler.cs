@@ -8,7 +8,9 @@ namespace BulletinBoard.Application.Bulletins.SearchBulletins;
 
 public class SearchBulletinsQueryHandler : BaseHandler, IRequestHandler<SearchBulletinsQuery, IEnumerable<Bulletin>>
 {
-    public SearchBulletinsQueryHandler(ITenantFactory tenantFactory) : base(tenantFactory) { }
+    public SearchBulletinsQueryHandler(ITenantFactory tenantFactory) : base(tenantFactory)
+    {
+    }
 
     public async Task<IEnumerable<Bulletin>> Handle(
         SearchBulletinsQuery request,

@@ -39,14 +39,14 @@ public class UserRepository : BaseRepository, IUserRepository
 
         var users = Context.Users.AsQueryable();
 
-        if (searchFilters.CreatedFromUtc is not null)
+        if (searchFilters.Created?.From is not null)
         {
-            users = users.Where(u => u.CreatedUtc >= searchFilters.CreatedFromUtc);
+            users = users.Where(u => u.CreatedUtc >= searchFilters.Created.From);
         }
 
-        if (searchFilters.CreatedToUtc is not null)
+        if (searchFilters.Created?.To is not null)
         {
-            users = users.Where(u => u.CreatedUtc <= searchFilters.CreatedToUtc);
+            users = users.Where(u => u.CreatedUtc <= searchFilters.Created.To);
         }
 
         if (searchFilters.SearchName is not null)
@@ -72,8 +72,8 @@ public class UserRepository : BaseRepository, IUserRepository
         };
 
         return await users
-            .Skip(searchFilters.Page * searchFilters.Count)
-            .Take(searchFilters.Count)
+            .Skip(searchFilters.Page.Offset)
+            .Take(searchFilters.Page.Count)
             .ToArrayAsync(cancellationToken);
     }
 
@@ -86,11 +86,12 @@ public class UserRepository : BaseRepository, IUserRepository
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         Guard.Against.Default(id);
 
-        var user = await GetByIdAsync(id, cancellationToken);
-        Context.Remove(user);
+        Context.Users.Where(u => u.Id == id).ExecuteDelete();
+
+        return Task.CompletedTask;
     }
 }

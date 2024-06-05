@@ -1,16 +1,14 @@
-﻿namespace BulletinBoard.Application.Models.Bulletins;
+﻿using BulletinBoard.Application.SearchFilters;
+
+namespace BulletinBoard.Application.Models.Bulletins;
 
 public record BulletinsSearchFilters(
-    int Page,
-    int Count,
-    string? SearchNumber,
+    PageFilter Page,
+    int? SearchNumber,
     string? SearchText,
     Guid? SearchUserId,
     BulletinsSortBy SortBy,
     bool Desc,
-    int? RatingFrom,
-    int? RatingTo,
-    DateTime? CreatedFromUtc,
-    DateTime? CreatedToUtc,
-    DateTime? ExpiryFromUtc,
-    DateTime? ExpiryToUtc);
+    BulletinsRatingFilter Rating,
+    DateRangeFilters Created,
+    DateRangeFilters Expiry);

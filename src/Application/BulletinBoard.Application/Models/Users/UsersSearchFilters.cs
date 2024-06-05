@@ -1,11 +1,11 @@
-﻿namespace BulletinBoard.Application.Models.Users;
+﻿using BulletinBoard.Application.SearchFilters;
+
+namespace BulletinBoard.Application.Models.Users;
 
 public record UsersSearchFilters(
-    int Page,
-    int Count,
+    PageFilter Page,
     string? SearchName,
     bool? SearchIsAdmin,
     UsersSortBy SortBy,
     bool Desc,
-    DateTime? CreatedFromUtc,
-    DateTime? CreatedToUtc);
+    DateRangeFilters Created);

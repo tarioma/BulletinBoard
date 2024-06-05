@@ -5,6 +5,7 @@ using BulletinBoard.Application.Repositories;
 using BulletinBoard.Application.Services;
 using BulletinBoard.Infrastructure.Context;
 using BulletinBoard.Infrastructure.Repositories;
+using BulletinBoard.WebAPI;
 using BulletinBoard.WebAPI.Services;
 using BulletinBoard.WebAPI.Tools;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
+//builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+//builder.Services.AddProblemDetails();
 builder.Services
     .AddControllers()
     .AddJsonOptions(options =>
@@ -42,7 +43,7 @@ builder.Services.AddSingleton<IImageService, ImageService>();
 builder.Services.Configure<BulletinsConfigurationOptions>(
     builder.Configuration.GetSection("BulletinsConfigurationOptions"));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddMapping();
 
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
@@ -52,11 +53,6 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
-    // app.UseSwaggerUI(options =>
-    // {
-    //     //options.SwaggerEndpoint("/swagger/swagger.json", "v1");
-    //     //options.DocExpansion(DocExpansion.List);
-    // });
 }
 else
 {
@@ -66,6 +62,6 @@ else
 
 app.MapControllers();
 app.UseStaticFiles();
-app.UseExceptionHandler();
+//app.UseExceptionHandler();
 
 app.Run();

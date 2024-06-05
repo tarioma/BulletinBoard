@@ -2,10 +2,38 @@
 
 namespace BulletinBoard.Application.Bulletins.CreateBulletin;
 
-public record CreateBulletinCommand(
-    string Text,
-    int Rating,
-    DateTime ExpiryUtc,
-    Guid UserId,
-    Stream? ImageStream,
-    string? ImageExtension) : IRequest<Guid>;
+public sealed record CreateBulletinCommand : IRequest<Guid>, IDisposable
+{
+    private readonly Lazy<Stream?> _lazyImageStream;
+
+    public CreateBulletinCommand(
+        string text,
+        int rating,
+        DateTime expiryUtc,
+        Guid userId,
+        Func<Stream?> imageStreamFactory,
+        string? imageExtension)
+    {
+        Text = text;
+        Rating = rating;
+        ExpiryUtc = expiryUtc;
+        UserId = userId;
+        _lazyImageStream = new Lazy<Stream?>(imageStreamFactory);
+        ImageExtension = imageExtension;
+    }
+
+    public string Text { get; }
+    public int Rating { get; }
+    public DateTime ExpiryUtc { get; }
+    public Guid UserId { get; }
+    public Stream? ImageStream => _lazyImageStream.Value;
+    public string? ImageExtension { get; }
+
+    public void Dispose()
+    {
+        if (_lazyImageStream.IsValueCreated)
+        {
+            _lazyImageStream.Value?.Dispose();
+        }
+    }
+}

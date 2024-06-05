@@ -1,71 +1,64 @@
-﻿using AutoMapper;
-using BulletinBoard.Application.Bulletins.CreateBulletin;
+﻿using BulletinBoard.Application.Bulletins.CreateBulletin;
 using BulletinBoard.Application.Bulletins.SearchBulletins;
 using BulletinBoard.Application.Bulletins.UpdateBulletin;
 using BulletinBoard.Application.Models.Bulletins;
+using BulletinBoard.Application.SearchFilters;
 using BulletinBoard.Contracts.Bulletins.Requests;
 using BulletinBoard.Contracts.Bulletins.Responses;
 using BulletinBoard.Domain.Entities;
+using Mapster;
 
 namespace BulletinBoard.WebAPI.MappingProfiles;
 
-public class BulletinMappingProfile : Profile
+public class BulletinMappingProfile : IRegister
 {
-    public BulletinMappingProfile()
+    private const string PreviewImagesPath = "/images/preview/";
+    private const string FullImagesPath = "/images/full/";
+
+    public void Register(TypeAdapterConfig config)
     {
-        CreateMap<CreateBulletinRequest, CreateBulletinCommand>()
-            .ForCtorParam("ExpiryUtc", opt => opt.MapFrom(src => src.Expiry.UtcDateTime))
-            .ForCtorParam("ImageStream",
-                opt => opt.MapFrom(src => src.Image != null ? src.Image.OpenReadStream() : null))
-            .ForCtorParam("ImageExtension",
-                opt => opt.MapFrom(src => src.Image != null ? Path.GetExtension(src.Image.FileName) : null));
+        config.NewConfig<CreateBulletinRequest, CreateBulletinCommand>()
+            .ConstructUsing(src => new CreateBulletinCommand(
+                src.Text,
+                src.Rating,
+                src.Expiry.UtcDateTime,
+                src.UserId,
+                () => src.Image != null ? src.Image.OpenReadStream() : null,
+                src.Image != null ? Path.GetExtension(src.Image.FileName) : null));
 
-        CreateMap<UpdateBulletinRequest, UpdateBulletinCommand>()
-            .ForCtorParam("ExpiryUtc", opt => opt.MapFrom(src => src.Expiry.UtcDateTime))
-            .ForCtorParam("ImageStream",
-                opt => opt.MapFrom(src => src.Image != null ? src.Image.OpenReadStream() : null))
-            .ForCtorParam("ImageExtension",
-                opt => opt.MapFrom(src => src.Image != null ? Path.GetExtension(src.Image.FileName) : null));
+        config.NewConfig<UpdateBulletinRequest, UpdateBulletinCommand>()
+            .ConstructUsing(src => new UpdateBulletinCommand(
+                Guid.Empty, // Задаётся в контроллере из параметров запроса
+                src.Text,
+                src.Rating,
+                src.Expiry.UtcDateTime,
+                () => src.Image != null ? src.Image.OpenReadStream() : null,
+                src.Image != null ? Path.GetExtension(src.Image.FileName) : null));
 
-        CreateMap<Bulletin, GetBulletinByIdResponse>()
-            .ForCtorParam("ImagePreview", opt => opt.MapFrom(src => src.Image == null
-                ? null
-                : $"images/preview/{src.Image}"))
-            .ForCtorParam("ImageFull", opt => opt.MapFrom(src => src.Image == null
-                ? null
-                : $"images/full/{src.Image}"));
+        config.NewConfig<Bulletin, GetBulletinByIdResponse>()
+            .Map(dest => dest.ImagePreview,
+                src => src.Image == null ? null : PreviewImagesPath + src.Image)
+            .Map(dest => dest.ImageFull,
+                src => src.Image == null ? null : FullImagesPath + src.Image);
 
-        CreateMap<SearchBulletinsRequest, BulletinsSearchFilters>()
-            .ForCtorParam("CreatedFromUtc", opt =>
-                opt.MapFrom(src => src.CreatedFrom.HasValue
-                    ? src.CreatedFrom.Value.UtcDateTime
-                    : (DateTime?)null))
-            .ForCtorParam("CreatedToUtc", opt =>
-                opt.MapFrom(src => src.CreatedTo.HasValue
-                    ? src.CreatedTo.Value.UtcDateTime
-                    : (DateTime?)null))
-            .ForCtorParam("ExpiryFromUtc", opt =>
-                opt.MapFrom(src => src.ExpiryFrom.HasValue
-                    ? src.ExpiryFrom.Value.UtcDateTime
-                    : (DateTime?)null))
-            .ForCtorParam("ExpiryToUtc", opt =>
-                opt.MapFrom(src => src.ExpiryTo.HasValue
-                    ? src.ExpiryTo.Value.UtcDateTime
-                    : (DateTime?)null));
+        config.NewConfig<SearchBulletinsRequest, BulletinsSearchFilters>()
+            .Map(dest => dest.Page,
+                src => new PageFilter(src.Count, src.Offset))
+            .Map(dest => dest.Rating,
+                src => new BulletinsRatingFilter(src.RatingFrom, src.RatingTo))
+            .Map(dest => dest.Created,
+                src => new DateRangeFilters(
+                    src.CreatedFrom.HasValue ? src.CreatedFrom.Value.UtcDateTime : null,
+                    src.CreatedTo.HasValue ? src.CreatedTo.Value.UtcDateTime : null))
+            .Map(dest => dest.Expiry,
+                src => new DateRangeFilters(
+                    src.ExpiryFrom.HasValue ? src.ExpiryFrom.Value.UtcDateTime : null,
+                    src.ExpiryTo.HasValue ? src.ExpiryTo.Value.UtcDateTime : null));
 
-        CreateMap<SearchBulletinsRequest, SearchBulletinsQuery>()
-            .ConvertUsing((src, _, context) =>
-            {
-                var mapper = context.Mapper;
-                var searchFilters = mapper.Map<BulletinsSearchFilters>(src);
-                return new SearchBulletinsQuery(searchFilters);
-            });
+        config.NewConfig<SearchBulletinsRequest, SearchBulletinsQuery>()
+            .MapWith(src => new SearchBulletinsQuery(src.Adapt<BulletinsSearchFilters>()));
 
-        CreateMap<IEnumerable<Bulletin>, SearchBulletinsResponse>()
-            .ConvertUsing((src, _, context) =>
-            {
-                var bulletins = src.Select(u => context.Mapper.Map<GetBulletinByIdResponse>(u));
-                return new SearchBulletinsResponse(bulletins);
-            });
+        config.NewConfig<IEnumerable<Bulletin>, SearchBulletinsResponse>()
+            .MapWith(src => new SearchBulletinsResponse(src.Select(u => u.Adapt<GetBulletinByIdResponse>())));
     }
 }

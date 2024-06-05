@@ -1,3 +1,3 @@
 ﻿namespace BulletinBoard.Contracts.Users.Requests;
 
-public record UpdateUserRequest(Guid? Id, string Name, bool IsAdmin);
+public record UpdateUserRequest(string Name, bool IsAdmin);

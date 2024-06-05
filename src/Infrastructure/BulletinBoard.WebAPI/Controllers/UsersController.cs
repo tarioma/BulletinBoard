@@ -1,5 +1,4 @@
 ﻿using Ardalis.GuardClauses;
-using AutoMapper;
 using BulletinBoard.Application.Users.CreateUser;
 using BulletinBoard.Application.Users.DeleteUser;
 using BulletinBoard.Application.Users.GetUserById;
@@ -7,6 +6,7 @@ using BulletinBoard.Application.Users.SearchUsers;
 using BulletinBoard.Application.Users.UpdateUser;
 using BulletinBoard.Contracts.Users.Requests;
 using BulletinBoard.Contracts.Users.Responses;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,8 +52,8 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Search([FromQuery] SearchUsersRequest request, CancellationToken cancellationToken)
     {
-        var command = _mapper.Map<SearchUsersQuery>(request);
-        var users = await _mediator.Send(command, cancellationToken);
+        var query = _mapper.Map<SearchUsersQuery>(request);
+        var users = await _mediator.Send(query, cancellationToken);
         var response = _mapper.Map<SearchUsersResponse>(users);
 
         return Ok(response);
@@ -65,8 +65,8 @@ public class UsersController : ControllerBase
         [FromBody] UpdateUserRequest request,
         CancellationToken cancellationToken)
     {
-        request = request with { Id = id };
         var command = _mapper.Map<UpdateUserCommand>(request);
+        command = command with { Id = id };
         await _mediator.Send(command, cancellationToken);
 
         return NoContent();

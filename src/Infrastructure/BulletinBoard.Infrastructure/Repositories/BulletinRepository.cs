@@ -3,7 +3,6 @@ using BulletinBoard.Application.Models.Bulletins;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
-using BulletinBoard.Infrastructure.Exceptions;
 using BulletinBoard.Infrastructure.Repositories.Common;
 using Microsoft.EntityFrameworkCore;
 using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
@@ -39,40 +38,39 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
 
         var bulletins = Context.Bulletins.AsQueryable();
 
-        if (searchFilters.RatingFrom is not null)
+        if (searchFilters.Rating.From is not null)
         {
-            bulletins = bulletins.Where(b => b.Rating >= searchFilters.RatingFrom);
+            bulletins = bulletins.Where(b => b.Rating >= searchFilters.Rating.From);
         }
 
-        if (searchFilters.RatingTo is not null)
+        if (searchFilters.Rating.To is not null)
         {
-            bulletins = bulletins.Where(b => b.Rating <= searchFilters.RatingTo);
+            bulletins = bulletins.Where(b => b.Rating <= searchFilters.Rating.To);
         }
 
-        if (searchFilters.CreatedFromUtc is not null)
+        if (searchFilters.Created.From is not null)
         {
-            bulletins = bulletins.Where(b => b.CreatedUtc >= searchFilters.CreatedFromUtc);
+            bulletins = bulletins.Where(b => b.CreatedUtc >= searchFilters.Created.From);
         }
 
-        if (searchFilters.CreatedToUtc is not null)
+        if (searchFilters.Created.To is not null)
         {
-            bulletins = bulletins.Where(b => b.CreatedUtc <= searchFilters.CreatedToUtc);
+            bulletins = bulletins.Where(b => b.CreatedUtc <= searchFilters.Created.To);
         }
 
-        if (searchFilters.ExpiryFromUtc is not null)
+        if (searchFilters.Expiry.From is not null)
         {
-            bulletins = bulletins.Where(b => b.ExpiryUtc >= searchFilters.ExpiryFromUtc);
+            bulletins = bulletins.Where(b => b.ExpiryUtc >= searchFilters.Expiry.From);
         }
 
-        if (searchFilters.ExpiryToUtc is not null)
+        if (searchFilters.Expiry.To is not null)
         {
-            bulletins = bulletins.Where(b => b.ExpiryUtc <= searchFilters.ExpiryToUtc);
+            bulletins = bulletins.Where(b => b.ExpiryUtc <= searchFilters.Expiry.To);
         }
 
         if (searchFilters.SearchNumber is not null)
         {
-            bulletins = bulletins.Where(b =>
-                EF.Functions.ILike(b.Number.ToString(), $"%{searchFilters.SearchNumber}%"));
+            bulletins = bulletins.Where(b => b.Number == searchFilters.SearchNumber);
         }
 
         if (searchFilters.SearchText is not null)
@@ -100,8 +98,8 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
         };
 
         return await bulletins
-            .Skip(searchFilters.Page * searchFilters.Count)
-            .Take(searchFilters.Count)
+            .Skip(searchFilters.Page.Offset)
+            .Take(searchFilters.Page.Count)
             .ToArrayAsync(cancellationToken);
     }
 
@@ -121,11 +119,12 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         Guard.Against.Default(id);
 
-        var bulletin = await GetByIdAsync(id, cancellationToken);
-        Context.Remove(bulletin);
+        Context.Bulletins.Where(u => u.Id == id).ExecuteDelete();
+
+        return Task.CompletedTask;
     }
 }

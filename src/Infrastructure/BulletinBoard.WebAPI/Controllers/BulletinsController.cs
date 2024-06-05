@@ -1,5 +1,4 @@
 ﻿using Ardalis.GuardClauses;
-using AutoMapper;
 using BulletinBoard.Application.Bulletins.CreateBulletin;
 using BulletinBoard.Application.Bulletins.DeleteBulletin;
 using BulletinBoard.Application.Bulletins.GetBulletinById;
@@ -7,6 +6,7 @@ using BulletinBoard.Application.Bulletins.SearchBulletins;
 using BulletinBoard.Application.Bulletins.UpdateBulletin;
 using BulletinBoard.Contracts.Bulletins.Requests;
 using BulletinBoard.Contracts.Bulletins.Responses;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,11 +19,10 @@ public class BulletinsController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
 
-    public BulletinsController(IMediator mediator, IMapper mapper, IWebHostEnvironment environment)
+    public BulletinsController(IMediator mediator, IMapper mapper)
     {
         Guard.Against.Null(mediator);
         Guard.Against.Null(mapper);
-        Guard.Against.Null(environment);
 
         _mediator = mediator;
         _mapper = mapper;
@@ -57,8 +56,8 @@ public class BulletinsController : ControllerBase
         [FromQuery] SearchBulletinsRequest request,
         CancellationToken cancellationToken)
     {
-        var command = _mapper.Map<SearchBulletinsQuery>(request);
-        var bulletins = await _mediator.Send(command, cancellationToken);
+        var query = _mapper.Map<SearchBulletinsQuery>(request);
+        var bulletins = await _mediator.Send(query, cancellationToken);
         var response = _mapper.Map<SearchBulletinsResponse>(bulletins);
 
         return Ok(response);
@@ -70,8 +69,8 @@ public class BulletinsController : ControllerBase
         [FromForm] UpdateBulletinRequest request,
         CancellationToken cancellationToken)
     {
-        request = request with { Id = id };
         var command = _mapper.Map<UpdateBulletinCommand>(request);
+        command = command with { Id = id };
         await _mediator.Send(command, cancellationToken);
 
         return NoContent();

@@ -1,47 +1,37 @@
-﻿using AutoMapper;
-using BulletinBoard.Application.Models.Users;
+﻿using BulletinBoard.Application.Models.Users;
+using BulletinBoard.Application.SearchFilters;
 using BulletinBoard.Application.Users.CreateUser;
 using BulletinBoard.Application.Users.SearchUsers;
 using BulletinBoard.Application.Users.UpdateUser;
 using BulletinBoard.Contracts.Users.Requests;
 using BulletinBoard.Contracts.Users.Responses;
 using BulletinBoard.Domain.Entities;
+using Mapster;
 
 namespace BulletinBoard.WebAPI.MappingProfiles;
 
-public class UserMappingProfile : Profile
+public class UserMappingProfile : IRegister
 {
-    public UserMappingProfile()
+    public void Register(TypeAdapterConfig config)
     {
-        CreateMap<CreateUserRequest, CreateUserCommand>();
+        config.NewConfig<CreateUserRequest, CreateUserCommand>();
+        config.NewConfig<UpdateUserRequest, UpdateUserCommand>();
+        config.NewConfig<User, GetUserByIdResponse>();
 
-        CreateMap<UpdateUserRequest, UpdateUserCommand>();
+        config.NewConfig<SearchUsersRequest, UsersSearchFilters>()
+            .Map(dest => dest.Page,
+                src => new PageFilter(src.Count, src.Offset))
+            .Map(dest => dest.SearchName, src => src.Name)
+            .Map(dest => dest.SearchIsAdmin, src => src.IsAdmin)
+            .Map(dest => dest.Created,
+                src => new DateRangeFilters(
+                    src.CreatedFrom.HasValue ? src.CreatedFrom.Value.UtcDateTime : null,
+                    src.CreatedTo.HasValue ? src.CreatedTo.Value.UtcDateTime : null));
 
-        CreateMap<User, GetUserByIdResponse>();
+        config.NewConfig<SearchUsersRequest, SearchUsersQuery>()
+            .MapWith(src => new SearchUsersQuery(src.Adapt<UsersSearchFilters>()));
 
-        CreateMap<SearchUsersRequest, UsersSearchFilters>()
-            .ForCtorParam("CreatedFromUtc", opt =>
-                opt.MapFrom(src => src.CreatedFrom.HasValue
-                    ? src.CreatedFrom.Value.UtcDateTime
-                    : (DateTime?)null))
-            .ForCtorParam("CreatedToUtc", opt =>
-                opt.MapFrom(src => src.CreatedTo.HasValue
-                    ? src.CreatedTo.Value.UtcDateTime
-                    : (DateTime?)null));
-
-        CreateMap<SearchUsersRequest, SearchUsersQuery>()
-            .ConvertUsing((src, _, context) =>
-            {
-                var mapper = context.Mapper;
-                var searchFilters = mapper.Map<UsersSearchFilters>(src);
-                return new SearchUsersQuery(searchFilters);
-            });
-
-        CreateMap<IEnumerable<User>, SearchUsersResponse>()
-            .ConvertUsing((src, _, context) =>
-            {
-                var users = src.Select(u => context.Mapper.Map<GetUserByIdResponse>(u));
-                return new SearchUsersResponse(users);
-            });
+        config.NewConfig<IEnumerable<User>, SearchUsersResponse>()
+            .MapWith(src => new SearchUsersResponse(src.Select(u => u.Adapt<GetUserByIdResponse>())));
     }
 }
