@@ -107,10 +107,7 @@ public class ImageService : IImageService
     {
         foreach (var p in imagePaths)
         {
-            if (File.Exists(p))
-            {
-                File.Delete(p);
-            }
+            File.Delete(p);
         }
     }
 }
