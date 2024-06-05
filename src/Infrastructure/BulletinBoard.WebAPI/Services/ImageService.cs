@@ -50,13 +50,9 @@ public class ImageService : IImageService
                 await SaveResizedImageAsync(fullImageFile, fileExtension, previewImagePath, cancellationToken);
             }
         }
-        catch
+        catch (Exception e)
         {
-            throw new FailedImageSaveException();
-        }
-        finally
-        {
-            stream.Close();
+            throw new FailedImageSaveException(e.Message);
         }
 
         return fileName;

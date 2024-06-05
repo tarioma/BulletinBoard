@@ -2,5 +2,7 @@
 
 public class FailedImageSaveException : Exception
 {
-    public FailedImageSaveException() : base("Не удалось сохранить изображение.") { }
+    public FailedImageSaveException(string text) : base($"Не удалось сохранить изображение. {text}")
+    {
+    }
 }
