@@ -27,17 +27,19 @@ public class UpdateBulletinCommandHandler : BaseHandler, IRequestHandler<UpdateB
 
         if (request.ImageStream is not null && request.ImageExtension is not null)
         {
-            if (bulletin.Image is not null)
-            {
-                await _imageService.DeleteImageAsync(bulletin.Image, cancellationToken);
-            }
-
-            bulletin.Image = request.ImageStream is not null && request.ImageExtension is not null
+            var newImage = request.ImageStream is not null && request.ImageExtension is not null
                 ? await _imageService.SaveImageAsync(
                     request.ImageStream,
                     request.ImageExtension,
                     cancellationToken)
                 : null;
+
+            bulletin.Image = newImage;
+
+            if (bulletin.Image is not null)
+            {
+                await _imageService.DeleteImageAsync(bulletin.Image, cancellationToken);
+            }
         }
 
         bulletin.SetText(request.Text);
