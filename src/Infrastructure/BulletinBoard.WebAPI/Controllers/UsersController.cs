@@ -29,6 +29,8 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<CreateUserResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
         var command = _mapper.Map<CreateUserCommand>(request);
@@ -40,6 +42,8 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType<GetUserByIdResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetUserByIdQuery(id);
@@ -50,6 +54,8 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<SearchUsersResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Search([FromQuery] SearchUsersRequest request, CancellationToken cancellationToken)
     {
         var query = _mapper.Map<SearchUsersQuery>(request);
@@ -60,6 +66,8 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
         Guid id,
         [FromBody] UpdateUserRequest request,
@@ -73,6 +81,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteUserCommand(id);

@@ -29,6 +29,8 @@ public class BulletinsController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<CreateBulletinResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(
         [FromForm] CreateBulletinRequest request,
         CancellationToken cancellationToken)
@@ -42,6 +44,8 @@ public class BulletinsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType<GetBulletinByIdResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetBulletinByIdQuery(id);
@@ -52,6 +56,8 @@ public class BulletinsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<SearchBulletinsResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Search(
         [FromQuery] SearchBulletinsRequest request,
         CancellationToken cancellationToken)
@@ -64,6 +70,8 @@ public class BulletinsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
         Guid id,
         [FromForm] UpdateBulletinRequest request,
@@ -77,6 +85,7 @@ public class BulletinsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteBulletinCommand(id);
