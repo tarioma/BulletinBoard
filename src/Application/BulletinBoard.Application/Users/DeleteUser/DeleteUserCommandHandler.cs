@@ -7,7 +7,9 @@ namespace BulletinBoard.Application.Users.DeleteUser;
 
 public class DeleteUserCommandHandler : BaseHandler, IRequestHandler<DeleteUserCommand>
 {
-    public DeleteUserCommandHandler(ITenantFactory tenantFactory) : base(tenantFactory) { }
+    public DeleteUserCommandHandler(ITenantFactory tenantFactory) : base(tenantFactory)
+    {
+    }
 
     public async Task Handle(DeleteUserCommand request, CancellationToken cancellationToken = default)
     {

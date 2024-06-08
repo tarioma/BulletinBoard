@@ -8,7 +8,9 @@ namespace BulletinBoard.Application.Users.SearchUsers;
 
 public class SearchUsersQueryHandler : BaseHandler, IRequestHandler<SearchUsersQuery, IEnumerable<User>>
 {
-    public SearchUsersQueryHandler(ITenantFactory tenantFactory) : base(tenantFactory) { }
+    public SearchUsersQueryHandler(ITenantFactory tenantFactory) : base(tenantFactory)
+    {
+    }
 
     public async Task<IEnumerable<User>> Handle(SearchUsersQuery request, CancellationToken cancellationToken = default)
     {

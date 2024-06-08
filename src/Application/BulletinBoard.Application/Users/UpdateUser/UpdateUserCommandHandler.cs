@@ -7,7 +7,9 @@ namespace BulletinBoard.Application.Users.UpdateUser;
 
 public class UpdateUserCommandHandler : BaseHandler, IRequestHandler<UpdateUserCommand>
 {
-    public UpdateUserCommandHandler(ITenantFactory tenantFactory) : base(tenantFactory) { }
+    public UpdateUserCommandHandler(ITenantFactory tenantFactory) : base(tenantFactory)
+    {
+    }
 
     public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken = default)
     {

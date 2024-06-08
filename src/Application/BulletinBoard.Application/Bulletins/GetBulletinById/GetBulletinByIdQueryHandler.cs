@@ -8,7 +8,9 @@ namespace BulletinBoard.Application.Bulletins.GetBulletinById;
 
 public class GetBulletinByIdQueryHandler : BaseHandler, IRequestHandler<GetBulletinByIdQuery, Bulletin>
 {
-    public GetBulletinByIdQueryHandler(ITenantFactory tenantFactory) : base(tenantFactory) { }
+    public GetBulletinByIdQueryHandler(ITenantFactory tenantFactory) : base(tenantFactory)
+    {
+    }
 
     public async Task<Bulletin> Handle(GetBulletinByIdQuery request, CancellationToken cancellationToken = default)
     {
