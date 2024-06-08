@@ -26,7 +26,7 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
     {
         Guard.Against.Default(id);
 
-        return await Context.Bulletins.SingleOrDefaultAsync(b => b.Id == id, cancellationToken)
+        return await Context.Bulletins.AsNoTracking().SingleOrDefaultAsync(b => b.Id == id, cancellationToken)
                ?? throw new NotFoundException("Объявление с таким id не найдено.");
     }
 
@@ -36,7 +36,7 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
     {
         Guard.Against.Null(searchFilters);
 
-        var bulletins = Context.Bulletins.AsQueryable();
+        var bulletins = Context.Bulletins.AsQueryable().AsNoTracking();
 
         if (searchFilters.Rating.From is not null)
         {

@@ -27,7 +27,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Default(id);
 
-        return await Context.Users.SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
+        return await Context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
                ?? throw new NotFoundException("Пользователь с таким id не найден.");
     }
 
@@ -37,9 +37,9 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Null(searchFilters);
 
-        var users = Context.Users.AsQueryable();
+        var users = Context.Users.AsQueryable().AsNoTracking();
 
-        if (searchFilters.Created?.From is not null)
+        if (searchFilters.Created.From is not null)
         {
             users = users.Where(u => u.CreatedUtc >= searchFilters.Created.From);
         }
