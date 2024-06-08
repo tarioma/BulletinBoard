@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-//builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-//builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services
     .AddControllers()
     .AddJsonOptions(options =>
@@ -62,6 +62,6 @@ else
 
 app.MapControllers();
 app.UseStaticFiles();
-//app.UseExceptionHandler();
+app.UseExceptionHandler();
 
 app.Run();

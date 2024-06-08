@@ -14,7 +14,9 @@ public class GlobalExceptionHandler : IExceptionHandler
         { typeof(NotFoundException), HttpStatusCode.NotFound },
         { typeof(ArgumentException), HttpStatusCode.BadRequest },
         { typeof(LimitReachedException), HttpStatusCode.BadRequest },
-        { typeof(FailedImageSaveException), HttpStatusCode.BadRequest }
+        { typeof(FailedImageSaveException), HttpStatusCode.BadRequest },
+        { typeof(InvalidFileFormatException), HttpStatusCode.BadRequest },
+        { typeof(ImageTooLargeException), HttpStatusCode.RequestEntityTooLarge }
     };
 
     public async ValueTask<bool> TryHandleAsync(
@@ -22,7 +24,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken = default)
     {
-        _exceptions.TryGetValue(exception.GetType(), out var statusCode);
+        var statusCode = _exceptions.GetValueOrDefault(exception.GetType(), HttpStatusCode.InternalServerError);
 
         var problemDetails = new ProblemDetails
         {
