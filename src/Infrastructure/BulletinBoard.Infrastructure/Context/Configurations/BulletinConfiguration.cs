@@ -51,5 +51,12 @@ public class BulletinConfiguration : IEntityTypeConfiguration<Bulletin>
             .WithMany()
             .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasIndex(b => b.Number);
+        builder.HasIndex(b => b.Text);
+        builder.HasIndex(b => b.UserId);
+        builder.HasIndex(b => b.Rating);
+        builder.HasIndex(b => b.ExpiryUtc);
+        builder.HasIndex(b => b.CreatedUtc);
     }
 }

@@ -28,5 +28,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("created_utc")
             .HasColumnType("timestamp without time zone")
             .IsRequired();
+
+        builder.HasIndex(b => b.Name);
+        builder.HasIndex(b => b.IsAdmin);
+        builder.HasIndex(b => b.CreatedUtc);
     }
 }
