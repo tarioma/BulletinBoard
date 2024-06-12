@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Infrastructure.Context;
-using BulletinBoard.Infrastructure.Exceptions;
 using BulletinBoard.Infrastructure.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -3,7 +3,6 @@ using BulletinBoard.Application.Models.Users;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
-using BulletinBoard.Infrastructure.Exceptions;
 using BulletinBoard.Infrastructure.Repositories.Common;
 using Microsoft.EntityFrameworkCore;
 using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
