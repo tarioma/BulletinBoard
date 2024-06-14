@@ -1,5 +1,4 @@
-﻿using BulletinBoard.Application.Models.Users;
-using BulletinBoard.Contracts.Extensions;
+﻿using BulletinBoard.Contracts.Extensions;
 
 namespace BulletinBoard.Contracts.Users.Requests;
 
@@ -8,7 +7,7 @@ public record SearchUsersRequest(
     int Offset = 0,
     string? Name = null,
     bool? IsAdmin = null,
-    UsersSortBy SortBy = UsersSortBy.Default,
+    string? SortBy = null,
     bool Desc = false,
     DateTimeOffset? CreatedFrom = null,
     DateTimeOffset? CreatedTo = null)

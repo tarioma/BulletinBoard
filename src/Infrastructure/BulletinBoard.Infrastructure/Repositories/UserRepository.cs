@@ -1,4 +1,5 @@
-﻿using Ardalis.GuardClauses;
+﻿using System.Linq.Dynamic.Core;
+using Ardalis.GuardClauses;
 using BulletinBoard.Application.Models.Users;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Domain.Entities;
@@ -43,7 +44,7 @@ public class UserRepository : BaseRepository, IUserRepository
             users = users.Where(u => u.CreatedUtc >= searchFilters.Created.From);
         }
 
-        if (searchFilters.Created?.To is not null)
+        if (searchFilters.Created.To is not null)
         {
             users = users.Where(u => u.CreatedUtc <= searchFilters.Created.To);
         }
@@ -59,16 +60,17 @@ public class UserRepository : BaseRepository, IUserRepository
             users = users.Where(u => u.IsAdmin == searchFilters.SearchIsAdmin);
         }
 
-        users = searchFilters.SortBy switch
+        var sortOptions = new Dictionary<string, string>
         {
-            UsersSortBy.Created when searchFilters.Desc => users.OrderByDescending(u => u.CreatedUtc),
-            UsersSortBy.Created => users.OrderBy(u => u.CreatedUtc),
-            UsersSortBy.Name when searchFilters.Desc => users.OrderByDescending(u => u.Name),
-            UsersSortBy.Name => users.OrderBy(u => u.Name),
-            UsersSortBy.IsAdmin when searchFilters.Desc => users.OrderByDescending(u => u.IsAdmin),
-            UsersSortBy.IsAdmin => users.OrderBy(u => u.IsAdmin),
-            _ => users
+            { "created", nameof(User.CreatedUtc) },
+            { "name", nameof(User.Name) },
+            { "isadmin", nameof(User.IsAdmin) }
         };
+        var sortBy = sortOptions.GetValueOrDefault(
+            searchFilters.SortBy?.ToLower() ?? "created", nameof(User.CreatedUtc));
+        users = searchFilters.Desc
+            ? users.OrderBy($"{sortBy} descending")
+            : users.OrderBy(sortBy);
 
         return await users
             .Skip(searchFilters.Page.Offset)

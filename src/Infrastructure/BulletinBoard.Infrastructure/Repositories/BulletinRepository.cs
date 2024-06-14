@@ -1,4 +1,5 @@
-﻿using Ardalis.GuardClauses;
+﻿using System.Linq.Dynamic.Core;
+using Ardalis.GuardClauses;
 using BulletinBoard.Application.Models.Bulletins;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Domain.Entities;
@@ -84,18 +85,21 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
             bulletins = bulletins.Where(b => b.UserId == searchFilters.SearchUserId);
         }
 
-        bulletins = searchFilters.SortBy switch
+        var sortOptions = new Dictionary<string, string>
         {
-            BulletinsSortBy.Created when searchFilters.Desc => bulletins.OrderByDescending(b => b.CreatedUtc),
-            BulletinsSortBy.Created => bulletins.OrderBy(b => b.CreatedUtc),
-            BulletinsSortBy.Number when searchFilters.Desc => bulletins.OrderByDescending(b => b.Number),
-            BulletinsSortBy.Number => bulletins.OrderBy(b => b.Number),
-            BulletinsSortBy.Text when searchFilters.Desc => bulletins.OrderByDescending(b => b.Text),
-            BulletinsSortBy.Text => bulletins.OrderBy(b => b.Text),
-            BulletinsSortBy.Rating when searchFilters.Desc => bulletins.OrderByDescending(b => b.Rating),
-            BulletinsSortBy.Rating => bulletins.OrderBy(b => b.Rating),
-            _ => bulletins
+            { "created", nameof(Bulletin.CreatedUtc) },
+            { "number", nameof(Bulletin.Number) },
+            { "text", nameof(Bulletin.Text) },
+            { "rating", nameof(Bulletin.Rating) }
         };
+        var sortBy = sortOptions.GetValueOrDefault(
+            searchFilters.SortBy?.ToLower() ?? "created", nameof(Bulletin.CreatedUtc));
+        bulletins = bulletins.OrderBy(sortBy);
+
+        if (searchFilters.Desc)
+        {
+            bulletins = bulletins.Reverse();
+        }
 
         return await bulletins
             .Skip(searchFilters.Page.Offset)

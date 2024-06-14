@@ -6,6 +6,6 @@ public record UsersSearchFilters(
     PageFilter Page,
     string? SearchName,
     bool? SearchIsAdmin,
-    UsersSortBy SortBy,
+    string? SortBy,
     bool Desc,
     DateRangeFilters Created);

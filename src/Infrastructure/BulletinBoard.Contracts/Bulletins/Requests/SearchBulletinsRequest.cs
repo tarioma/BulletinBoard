@@ -1,5 +1,4 @@
-﻿using BulletinBoard.Application.Models.Bulletins;
-using BulletinBoard.Contracts.Extensions;
+﻿using BulletinBoard.Contracts.Extensions;
 
 namespace BulletinBoard.Contracts.Bulletins.Requests;
 
@@ -8,7 +7,7 @@ public record SearchBulletinsRequest(
     int Offset = 0,
     string? Text = null,
     Guid? UserId = null,
-    BulletinsSortBy SortBy = BulletinsSortBy.Default,
+    string? SortBy = null,
     bool Desc = false,
     int? RatingFrom = null,
     int? RatingTo = null,

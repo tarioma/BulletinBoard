@@ -7,7 +7,7 @@ public record BulletinsSearchFilters(
     int? SearchNumber,
     string? SearchText,
     Guid? SearchUserId,
-    BulletinsSortBy SortBy,
+    string? SortBy,
     bool Desc,
     BulletinsRatingFilter Rating,
     DateRangeFilters Created,
