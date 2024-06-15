@@ -4,7 +4,7 @@ using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.CreateBulletin;
 
-public sealed record CreateBulletinCommand : IRequest<Guid>, IDisposable
+public sealed class CreateBulletinCommand : IRequest<Guid>, IDisposable
 {
     private readonly Lazy<Stream?> _lazyImageStream;
 

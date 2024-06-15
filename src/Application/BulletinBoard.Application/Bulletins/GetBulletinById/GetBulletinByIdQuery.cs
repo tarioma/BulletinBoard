@@ -4,7 +4,7 @@ using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.GetBulletinById;
 
-public record GetBulletinByIdQuery : IRequest<Bulletin>
+public class GetBulletinByIdQuery : IRequest<Bulletin>
 {
     public GetBulletinByIdQuery(Guid id)
     {

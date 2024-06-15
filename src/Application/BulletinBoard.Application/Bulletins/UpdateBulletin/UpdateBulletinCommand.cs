@@ -4,7 +4,7 @@ using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.UpdateBulletin;
 
-public sealed record UpdateBulletinCommand : IRequest, IDisposable
+public sealed class UpdateBulletinCommand : IRequest, IDisposable
 {
     private readonly Lazy<Stream?> _lazyImageStream;
 
@@ -16,11 +16,6 @@ public sealed record UpdateBulletinCommand : IRequest, IDisposable
         Func<Stream?> imageStreamFactory,
         string? imageExtension)
     {
-        Guard.Against.Default(
-            id,
-            nameof(id),
-            "Не может иметь значение по умолчанию.");
-
         Guard.Against.NullOrWhiteSpace(
             text,
             nameof(text),
@@ -45,7 +40,7 @@ public sealed record UpdateBulletinCommand : IRequest, IDisposable
         ImageExtension = imageExtension;
     }
 
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
     public string Text { get; }
     public int Rating { get; }
     public DateTime ExpiryUtc { get; }

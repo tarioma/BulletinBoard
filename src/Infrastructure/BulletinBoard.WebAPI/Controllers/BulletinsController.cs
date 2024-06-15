@@ -78,7 +78,7 @@ public class BulletinsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = _mapper.Map<UpdateBulletinCommand>(request);
-        command = command with { Id = id };
+        command.Id = id;
         await _mediator.Send(command, cancellationToken);
 
         return NoContent();

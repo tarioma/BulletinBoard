@@ -8,11 +8,6 @@ public class UpdateUserCommand : IRequest
 {
     public UpdateUserCommand(Guid id, string name, bool isAdmin)
     {
-        Guard.Against.Default(
-            id,
-            nameof(id),
-            "Не может иметь значение по умолчанию.");
-
         Guard.Against.NullOrWhiteSpace(
             name,
             nameof(name),

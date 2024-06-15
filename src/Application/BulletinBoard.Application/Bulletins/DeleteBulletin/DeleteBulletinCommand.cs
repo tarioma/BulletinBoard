@@ -3,7 +3,7 @@ using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.DeleteBulletin;
 
-public record DeleteBulletinCommand : IRequest
+public class DeleteBulletinCommand : IRequest
 {
     public DeleteBulletinCommand(Guid id)
     {
