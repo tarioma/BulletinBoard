@@ -74,7 +74,7 @@ public class UsersController : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = _mapper.Map<UpdateUserCommand>(request);
-        command = command with { Id = id };
+        command.Id = id;
         await _mediator.Send(command, cancellationToken);
 
         return NoContent();

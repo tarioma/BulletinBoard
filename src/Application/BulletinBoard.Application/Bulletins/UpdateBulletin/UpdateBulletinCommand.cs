@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using Ardalis.GuardClauses;
+using BulletinBoard.Domain.Entities;
+using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.UpdateBulletin;
 
@@ -14,6 +16,27 @@ public sealed record UpdateBulletinCommand : IRequest, IDisposable
         Func<Stream?> imageStreamFactory,
         string? imageExtension)
     {
+        Guard.Against.Default(
+            id,
+            nameof(id),
+            "Не может иметь значение по умолчанию.");
+
+        Guard.Against.NullOrWhiteSpace(
+            text,
+            nameof(text),
+            "Параметр является обязательным.");
+
+        Guard.Against.StringTooLong(
+            text,
+            Bulletin.MaxTextLength,
+            nameof(text),
+            $"Максимальная длина: {Bulletin.MaxTextLength}.");
+
+        Guard.Against.Default(
+            expiryUtc,
+            nameof(expiryUtc),
+            "Не может иметь значение по умолчанию.");
+
         Id = id;
         Text = text;
         Rating = rating;

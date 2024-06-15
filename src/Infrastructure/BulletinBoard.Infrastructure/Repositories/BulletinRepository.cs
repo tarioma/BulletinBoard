@@ -85,21 +85,9 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
             bulletins = bulletins.Where(b => b.UserId == searchFilters.SearchUserId);
         }
 
-        var sortOptions = new Dictionary<string, string>
-        {
-            { "created", nameof(Bulletin.CreatedUtc) },
-            { "number", nameof(Bulletin.Number) },
-            { "text", nameof(Bulletin.Text) },
-            { "rating", nameof(Bulletin.Rating) }
-        };
-        var sortBy = sortOptions.GetValueOrDefault(
-            searchFilters.SortBy?.ToLower() ?? "created", nameof(Bulletin.CreatedUtc));
-        bulletins = bulletins.OrderBy(sortBy);
-
-        if (searchFilters.Desc)
-        {
-            bulletins = bulletins.Reverse();
-        }
+        bulletins = searchFilters.Desc
+            ? bulletins.OrderBy($"{searchFilters.SortBy} descending")
+            : bulletins.OrderBy(searchFilters.SortBy);
 
         return await bulletins
             .Skip(searchFilters.Page.Offset)

@@ -60,18 +60,10 @@ public class UserRepository : BaseRepository, IUserRepository
             users = users.Where(u => u.IsAdmin == searchFilters.SearchIsAdmin);
         }
 
-        var sortOptions = new Dictionary<string, string>
-        {
-            { "created", nameof(User.CreatedUtc) },
-            { "name", nameof(User.Name) },
-            { "isadmin", nameof(User.IsAdmin) }
-        };
-        var sortBy = sortOptions.GetValueOrDefault(
-            searchFilters.SortBy?.ToLower() ?? "created", nameof(User.CreatedUtc));
         users = searchFilters.Desc
-            ? users.OrderBy($"{sortBy} descending")
-            : users.OrderBy(sortBy);
-
+            ? users.OrderBy($"{searchFilters.SortBy} descending")
+            : users.OrderBy(searchFilters.SortBy);
+        
         return await users
             .Skip(searchFilters.Page.Offset)
             .Take(searchFilters.Page.Count)
