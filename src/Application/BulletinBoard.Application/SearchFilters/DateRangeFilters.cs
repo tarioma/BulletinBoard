@@ -1,3 +1,7 @@
 ﻿namespace BulletinBoard.Application.SearchFilters;
 
-public record DateRangeFilters(DateTime? From, DateTime? To);
+public readonly struct DateRangeFilters(DateTime? from, DateTime? to)
+{
+    public DateTime? From { get; } = from;
+    public DateTime? To { get; } = to;
+}

@@ -2,7 +2,7 @@
 
 namespace BulletinBoard.Application.SearchFilters;
 
-public class PageFilter
+public readonly struct PageFilter
 {
     public PageFilter(int count, int offset)
     {

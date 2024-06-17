@@ -39,7 +39,7 @@ public class UserRepository : BaseRepository, IUserRepository
 
         var users = Context.Users.AsQueryable().AsNoTracking();
 
-        if (searchFilters.Created.From is not null)
+        if (searchFilters.Created.To is not null)
         {
             users = users.Where(u => u.CreatedUtc >= searchFilters.Created.From);
         }
