@@ -2,16 +2,16 @@
 using BulletinBoard.Application.Bulletins.SearchBulletins;
 using BulletinBoard.Application.Models.Bulletins;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Tests.Extensions;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
 using FluentAssertions;
 using Moq;
 
-namespace BulletinBoard.Application.Tests.Bulletins;
+namespace BulletinBoard.Application.Tests.Bulletins.SearchBulletins;
 
 public class SearchBulletinsQueryHandlerTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = ApplicationFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public async Task Handle_ValidQuery_ReturnsIEnumerableWithSingleUser()
@@ -24,17 +24,12 @@ public class SearchBulletinsQueryHandlerTests
         bulletinRepositoryMock
             .Setup(r => r.SearchAsync(
                 It.Is<BulletinsSearchFilters>(f => f.Page == searchFilters.Page &&
-                                                   f.Count == searchFilters.Count &&
                                                    f.SearchNumber == searchFilters.SearchNumber &&
+                                                   f.SearchText == searchFilters.SearchText &&
                                                    f.SearchUserId == searchFilters.SearchUserId &&
                                                    f.SortBy == searchFilters.SortBy &&
                                                    f.Desc == searchFilters.Desc &&
-                                                   f.RatingFrom == searchFilters.RatingFrom &&
-                                                   f.RatingTo == searchFilters.RatingTo &&
-                                                   f.CreatedFromUtc == searchFilters.CreatedFromUtc &&
-                                                   f.CreatedToUtc == searchFilters.CreatedToUtc &&
-                                                   f.ExpiryFromUtc == searchFilters.ExpiryFromUtc &&
-                                                   f.ExpiryToUtc == searchFilters.ExpiryToUtc),
+                                                   f.Created == searchFilters.Created),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { bulletin });
 

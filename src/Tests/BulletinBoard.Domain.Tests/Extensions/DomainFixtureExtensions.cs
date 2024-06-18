@@ -1,8 +1,9 @@
 ﻿using AutoFixture;
+using BulletinBoard.Domain.Tests.Customizations;
 
-namespace BulletinBoard.Domain.Tests.Tools;
+namespace BulletinBoard.Domain.Tests.Extensions;
 
-public static class FixtureExtensions
+public static class DomainFixtureExtensions
 {
     public static IFixture GetFixtureWithAllCustomizations()
     {

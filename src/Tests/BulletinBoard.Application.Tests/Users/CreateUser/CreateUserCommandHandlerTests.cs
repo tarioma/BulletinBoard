@@ -1,16 +1,16 @@
 ﻿using AutoFixture;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Tests.Extensions;
 using BulletinBoard.Application.Users.CreateUser;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
 using FluentAssertions;
 using Moq;
 
-namespace BulletinBoard.Application.Tests.Users;
+namespace BulletinBoard.Application.Tests.Users.CreateUser;
 
 public class CreateUserCommandHandlerTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = ApplicationFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public async Task Handle_ValidRequest_ReturnsUserId()

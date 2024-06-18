@@ -46,7 +46,7 @@ public class BulletinsSearchFilters
         if (sortBy is not null && !SortOptions.Any(s => s.Equals(sortBy, StringComparison.InvariantCultureIgnoreCase)))
         {
             throw new ArgumentException(
-                $"Неверный параметр сортировки. Возможные варианты: {string.Join(", ", SortOptions)}.");
+                $"Неверный параметр сортировки. Возможные варианты: {string.Join(", ", SortOptions)}.", nameof(sortBy));
         }
 
         Page = page;

@@ -1,48 +1,48 @@
 ﻿using AutoFixture;
-using BulletinBoard.Application.Bulletins.GetBulletinById;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Tests.Extensions;
+using BulletinBoard.Application.Users.GetUserById;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
 using FluentAssertions;
 using Moq;
 
-namespace BulletinBoard.Application.Tests.Bulletins;
+namespace BulletinBoard.Application.Tests.Users.GetUserById;
 
-public class GetBulletinByIdQueryHandlerTests
+public class GetUserByIdQueryHandlerTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = ApplicationFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public async Task Handle_ValidRequest_Successfully()
     {
         // Arrange
-        var bulletin = _fixture.Create<Bulletin>();
+        var user = _fixture.Create<User>();
 
-        var bulletinRepositoryMock = new Mock<IBulletinRepository>(MockBehavior.Strict);
-        bulletinRepositoryMock
+        var userRepositoryMock = new Mock<IUserRepository>(MockBehavior.Strict);
+        userRepositoryMock
             .Setup(r => r.GetByIdAsync(
-                It.Is<Guid>(i => i == bulletin.Id),
+                It.Is<Guid>(i => i == user.Id),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(bulletin);
+            .ReturnsAsync(user);
 
         var tenantMock = new Mock<ITenant>(MockBehavior.Strict);
         tenantMock
-            .SetupGet(t => t.Bulletins)
-            .Returns(bulletinRepositoryMock.Object);
+            .SetupGet(t => t.Users)
+            .Returns(userRepositoryMock.Object);
 
         var tenantFactoryMock = new Mock<ITenantFactory>(MockBehavior.Strict);
         tenantFactoryMock
             .Setup(f => f.GetTenant())
             .Returns(tenantMock.Object);
 
-        var request = new GetBulletinByIdQuery(bulletin.Id);
-        var handler = new GetBulletinByIdQueryHandler(tenantFactoryMock.Object);
+        var request = new GetUserByIdQuery(user.Id);
+        var handler = new GetUserByIdQueryHandler(tenantFactoryMock.Object);
 
         // Act
         await handler.Handle(request);
 
         // Assert
-        bulletinRepositoryMock.VerifyAll();
+        userRepositoryMock.VerifyAll();
         tenantFactoryMock.VerifyAll();
         tenantMock.VerifyAll();
     }
@@ -52,8 +52,8 @@ public class GetBulletinByIdQueryHandlerTests
     {
         // Arrange
         var tenantFactoryMock = new Mock<ITenantFactory>();
-        GetBulletinByIdQuery request = null!;
-        var handler = new GetBulletinByIdQueryHandler(tenantFactoryMock.Object);
+        GetUserByIdQuery request = null!;
+        var handler = new GetUserByIdQueryHandler(tenantFactoryMock.Object);
 
         // Act
         var action = async () => await handler.Handle(request);

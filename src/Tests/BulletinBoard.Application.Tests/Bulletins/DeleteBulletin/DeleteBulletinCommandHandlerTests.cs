@@ -1,26 +1,26 @@
 ﻿using AutoFixture;
-using BulletinBoard.Application.Bulletins.UpdateBulletin;
+using BulletinBoard.Application.Bulletins.DeleteBulletin;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Application.Services;
+using BulletinBoard.Application.Tests.Extensions;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
 using FluentAssertions;
 using Moq;
 
-namespace BulletinBoard.Application.Tests.Bulletins;
+namespace BulletinBoard.Application.Tests.Bulletins.DeleteBulletin;
 
-public class UpdateBulletinCommandHandlerTests
+public class DeleteBulletinCommandHandlerTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = ApplicationFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public async Task Handle_ValidRequest_Successfully()
     {
         // Arrange
-        var bulletin = _fixture.Create<Bulletin>();
         var imageStream = new MemoryStream();
         var imageExtension = _fixture.Create<string>();
         var image = _fixture.Create<string>();
+        var bulletin = _fixture.Create<Bulletin>();
 
         var bulletinRepositoryMock = new Mock<IBulletinRepository>(MockBehavior.Strict);
         bulletinRepositoryMock
@@ -28,11 +28,9 @@ public class UpdateBulletinCommandHandlerTests
                 It.Is<Guid>(i => i == bulletin.Id),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(bulletin);
-        bulletinRepositoryMock.Setup(r => r.UpdateAsync(
-                It.Is<Bulletin>(b => b.Id == bulletin.Id &&
-                                     b.Text == bulletin.Text &&
-                                     b.Rating == bulletin.Rating &&
-                                     b.ExpiryUtc == bulletin.ExpiryUtc),
+        bulletinRepositoryMock
+            .Setup(r => r.DeleteAsync(
+                It.Is<Guid>(i => i == bulletin.Id),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
@@ -51,25 +49,13 @@ public class UpdateBulletinCommandHandlerTests
 
         var imageServiceMock = new Mock<IImageService>(MockBehavior.Strict);
         imageServiceMock
-            .Setup(f => f.SaveImageAsync(
-                It.Is<Stream>(s => s == imageStream),
-                It.Is<string>(s => s == imageExtension),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(image);
-        imageServiceMock
             .Setup(f => f.DeleteImageAsync(
                 It.Is<string>(s => s == bulletin.Image),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var request = new UpdateBulletinCommand(
-            bulletin.Id,
-            bulletin.Text,
-            bulletin.Rating,
-            bulletin.ExpiryUtc,
-            imageStream,
-            imageExtension);
-        var handler = new UpdateBulletinCommandHandler(tenantFactoryMock.Object, imageServiceMock.Object);
+        var request = new DeleteBulletinCommand(bulletin.Id);
+        var handler = new DeleteBulletinCommandHandler(tenantFactoryMock.Object, imageServiceMock.Object);
 
         // Act
         await handler.Handle(request);
@@ -85,9 +71,9 @@ public class UpdateBulletinCommandHandlerTests
     {
         // Arrange
         var tenantFactoryMock = new Mock<ITenantFactory>();
-        UpdateBulletinCommand request = null!;
+        DeleteBulletinCommand request = null!;
         var imageServiceMock = new Mock<IImageService>();
-        var handler = new UpdateBulletinCommandHandler(tenantFactoryMock.Object, imageServiceMock.Object);
+        var handler = new DeleteBulletinCommandHandler(tenantFactoryMock.Object, imageServiceMock.Object);
 
         // Act
         var action = async () => await handler.Handle(request);

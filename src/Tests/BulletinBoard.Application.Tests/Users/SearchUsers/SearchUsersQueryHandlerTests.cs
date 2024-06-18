@@ -1,17 +1,17 @@
 ﻿using AutoFixture;
 using BulletinBoard.Application.Models.Users;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Tests.Extensions;
 using BulletinBoard.Application.Users.SearchUsers;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
 using FluentAssertions;
 using Moq;
 
-namespace BulletinBoard.Application.Tests.Users;
+namespace BulletinBoard.Application.Tests.Users.SearchUsers;
 
 public class SearchUsersQueryHandlerTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = ApplicationFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public async Task Handle_ValidQuery_ReturnsIEnumerableWithSingleUser()
@@ -24,13 +24,11 @@ public class SearchUsersQueryHandlerTests
         userRepositoryMock
             .Setup(r => r.SearchAsync(
                 It.Is<UsersSearchFilters>(f => f.Page == searchFilters.Page &&
-                                               f.Count == searchFilters.Count &&
                                                f.SearchName == searchFilters.SearchName &&
                                                f.SearchIsAdmin == searchFilters.SearchIsAdmin &&
                                                f.SortBy == searchFilters.SortBy &&
                                                f.Desc == searchFilters.Desc &&
-                                               f.CreatedFromUtc == searchFilters.CreatedFromUtc &&
-                                               f.CreatedToUtc == searchFilters.CreatedToUtc),
+                                               f.Created == searchFilters.Created),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { user });
 

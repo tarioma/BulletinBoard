@@ -6,7 +6,7 @@ namespace BulletinBoard.Application.Users.UpdateUser;
 
 public class UpdateUserCommand : IRequest
 {
-    public UpdateUserCommand(Guid id, string name, bool isAdmin)
+    public UpdateUserCommand(string name, bool isAdmin)
     {
         Guard.Against.NullOrWhiteSpace(
             name,
@@ -19,7 +19,6 @@ public class UpdateUserCommand : IRequest
             nameof(name),
             $"Максимальная длина {nameof(name)}: {User.MaxNameLength}.");
 
-        Id = id;
         Name = name;
         IsAdmin = isAdmin;
     }

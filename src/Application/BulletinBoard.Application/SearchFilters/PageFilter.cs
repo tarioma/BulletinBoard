@@ -15,4 +15,14 @@ public readonly struct PageFilter
 
     public int Count { get; }
     public int Offset { get; }
+
+    public override bool Equals(object? obj) => obj is PageFilter filter && Equals(filter);
+
+    public override int GetHashCode() => HashCode.Combine(Count, Offset);
+
+    public static bool operator ==(PageFilter left, PageFilter right) => left.Equals(right);
+
+    public static bool operator !=(PageFilter left, PageFilter right) => !(left == right);
+
+    private bool Equals(PageFilter other) => Count == other.Count && Offset == other.Offset;
 }

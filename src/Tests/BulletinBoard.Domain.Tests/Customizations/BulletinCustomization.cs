@@ -1,7 +1,7 @@
 ﻿using AutoFixture;
 using BulletinBoard.Domain.Entities;
 
-namespace BulletinBoard.Domain.Tests.Tools;
+namespace BulletinBoard.Domain.Tests.Customizations;
 
 public class BulletinCustomization : ICustomization
 {

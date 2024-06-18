@@ -4,17 +4,17 @@ using BulletinBoard.Application.Exceptions;
 using BulletinBoard.Application.Options;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Application.Services;
+using BulletinBoard.Application.Tests.Extensions;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace BulletinBoard.Application.Tests.Bulletins;
+namespace BulletinBoard.Application.Tests.Bulletins.CreateBulletin;
 
 public class CreateBulletinCommandHandlerTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = ApplicationFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public async Task Handle_ValidRequest_ReturnsUserId()
@@ -22,7 +22,7 @@ public class CreateBulletinCommandHandlerTests
         // Arrange
         var text = _fixture.Create<string>();
         var rating = _fixture.Create<int>();
-        var imageStream = new MemoryStream();
+        var imageStream = () => new MemoryStream();
         var imageExtension = _fixture.Create<string>();
         var expiryUtc = DateTime.UtcNow.AddDays(1);
         var userId = _fixture.Create<Guid>();
@@ -65,7 +65,7 @@ public class CreateBulletinCommandHandlerTests
         var imageServiceMock = new Mock<IImageService>(MockBehavior.Strict);
         imageServiceMock
             .Setup(f => f.SaveImageAsync(
-                It.Is<Stream>(s => s == imageStream),
+                It.IsAny<Stream>(),
                 It.Is<string>(s => s == imageExtension),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(image);
@@ -94,7 +94,7 @@ public class CreateBulletinCommandHandlerTests
         // Arrange
         var text = _fixture.Create<string>();
         var rating = _fixture.Create<int>();
-        var imageStream = new MemoryStream();
+        var imageStream = () => new MemoryStream();
         var imageExtension = _fixture.Create<string>();
         var expiryUtc = DateTime.UtcNow.AddDays(1);
         var userId = _fixture.Create<Guid>();

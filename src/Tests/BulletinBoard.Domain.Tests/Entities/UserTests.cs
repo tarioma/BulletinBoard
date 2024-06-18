@@ -1,13 +1,13 @@
 ﻿using AutoFixture;
 using BulletinBoard.Domain.Entities;
-using BulletinBoard.Domain.Tests.Tools;
+using BulletinBoard.Domain.Tests.Extensions;
 using FluentAssertions;
 
 namespace BulletinBoard.Domain.Tests.Entities;
 
 public class UserTests
 {
-    private readonly IFixture _fixture = FixtureExtensions.GetFixtureWithAllCustomizations();
+    private readonly IFixture _fixture = DomainFixtureExtensions.GetFixtureWithAllCustomizations();
 
     [Fact]
     public void Ctor_ValidParams_SuccessfulInit()
