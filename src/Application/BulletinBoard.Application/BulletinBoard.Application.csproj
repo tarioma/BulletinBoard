@@ -8,10 +8,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Domain\BulletinBoard.Domain\BulletinBoard.Domain.csproj" />
+      <ProjectReference Include="..\BulletinBoard.Application.Abstraction\BulletinBoard.Application.Abstraction.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="MediatR" Version="12.2.0" />
+      <PackageReference Include="Mapster" Version="7.4.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
     </ItemGroup>
 
