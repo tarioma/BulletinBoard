@@ -1,20 +1,35 @@
 ﻿services:
-  bulletin_board:
-    image: bulletin_board
+  users:
+    image: users
+    container_name: users
     build:
       context: .
-      dockerfile: src/Infrastructure/BulletinBoard/Dockerfile
+      dockerfile: src/Users/Infrastructure/Users/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://localhost:5000
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://0.0.0.0:5000
     ports:
       - "5000:5000"
     depends_on:
       - db
 
+  bulletins:
+    image: bulletins
+    container_name: bulletins
+    build:
+      context: .
+      dockerfile: src/Bulletins/Infrastructure/Bulletins/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://0.0.0.0:5001
+    ports:
+      - "5001:5001"
+    depends_on:
+      - db
+
   db:
     image: postgres:latest
-    container_name: bulletin_board
+    container_name: db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 9OQchV5ekIJX_YSQ
