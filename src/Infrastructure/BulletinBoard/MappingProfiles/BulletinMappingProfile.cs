@@ -1,16 +1,16 @@
-﻿using BulletinBoard.Domain.Entities;
+﻿using AutoMapper;
+using BulletinBoard.Domain.Entities;
 using BulletinBoard.WebAPI.Models.Responses;
-using Mapster;
 
 namespace BulletinBoard.WebAPI.MappingProfiles;
 
-public class BulletinMappingProfile : IRegister
+public class BulletinMappingProfile : Profile
 {
-    public void Register(TypeAdapterConfig config)
+    public BulletinMappingProfile()
     {
-        config.NewConfig<Bulletin, GetBulletinByIdResponse>();
+        CreateMap<Bulletin, GetBulletinByIdResponse>();
 
-        config.NewConfig<Bulletin[], SearchBulletinsResponse>()
-            .Map(dest => dest.Bulletins, src => src.Select(u => u.Adapt<GetBulletinByIdResponse>()).ToArray());
+        CreateMap<Bulletin[], SearchBulletinsResponse>()
+            .ForMember(dest => dest.Bulletins, opt => opt.MapFrom(src => src));
     }
 }

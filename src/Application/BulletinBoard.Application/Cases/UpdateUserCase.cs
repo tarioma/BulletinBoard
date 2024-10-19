@@ -1,33 +1,31 @@
-﻿using BulletinBoard.Application.Abstraction.Models.Commands;
+﻿using AutoMapper;
+using BulletinBoard.Application.Abstraction.Models.Commands;
 using BulletinBoard.Application.Abstraction.Repositories;
-using BulletinBoard.Domain.Entities;
-using MapsterMapper;
 using MediatR;
 
-namespace BulletinBoard.Application.Users;
+namespace BulletinBoard.Application.Cases;
 
-public class CreateUserCommandHandler : IRequestHandler<ICreateUserCommand, Guid>
+public class UpdateUserCase : IRequestHandler<IUpdateUserCommand>
 {
     private readonly IUserRepository _users;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public CreateUserCommandHandler(IUserRepository users, IUnitOfWork unitOfWork, IMapper mapper)
+    public UpdateUserCase(IUserRepository users, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _users = users ?? throw new ArgumentNullException(nameof(users));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    public async Task<Guid> Handle(ICreateUserCommand request, CancellationToken cancellationToken)
+    public async Task Handle(IUpdateUserCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var user = _mapper.Map<User>(request);
+        var user = await _users.GetByIdAsync(request.Id, cancellationToken);
+        _mapper.Map(request, user);
 
-        await _users.CreateAsync(user, cancellationToken);
+        await _users.UpdateAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return user.Id;
     }
 }

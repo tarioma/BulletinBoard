@@ -2,5 +2,5 @@
 
 public class SearchBulletinsResponse
 {
-    public GetBulletinByIdResponse[] Bulletins { get; init; } = null!;
+    public GetBulletinByIdResponse[] Bulletins { get; init; } = [];
 }

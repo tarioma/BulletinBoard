@@ -1,8 +1,6 @@
 ﻿using BulletinBoard.Application.Abstraction.Repositories;
 using BulletinBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
-using BulletinBoard.Application.Abstraction.Models.SearchFilters;
 using BulletinBoard.Dal.Exceptions;
 
 namespace BulletinBoard.Dal.Repositories;
@@ -34,44 +32,19 @@ public class UserRepository : IUserRepository
                ?? throw new NotFoundException("Пользователь с таким id не найден.");
     }
 
-    public async Task<User[]> SearchAsync(PageFilter page, string? text, bool? isAdmin, string? sortBy, bool desc,
-        DateRangeFilters created, CancellationToken cancellationToken = default)
+    public async Task<User[]> SearchAsync(int page, int pageSize, string? text, bool? isAdmin, string? sortBy, bool desc,
+        DateTime? createdFrom, DateTime? createdTo, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(page);
-        ArgumentNullException.ThrowIfNull(created);
-
-        var users = _context.Users.AsQueryable().AsNoTracking();
-
-        if (created.To is not null)
-        {
-            users = users.Where(u => u.CreatedUtc >= created.From);
-        }
-
-        if (created.To is not null)
-        {
-            users = users.Where(u => u.CreatedUtc <= created.To);
-        }
-
-        if (text is not null)
-        {
-            users = users.Where(u => EF.Functions.ILike(u.Name, $"%{text.Trim()}%"));
-        }
-
-        if (isAdmin is not null)
-        {
-            users = users.Where(u => u.IsAdmin == isAdmin);
-        }
-
-        if (sortBy is not null)
-        {
-            users = desc
-                ? users.OrderBy($"{sortBy} descending")
-                : users.OrderBy(sortBy);
-        }
-
-        return await users
-            .Skip(page.Offset)
-            .Take(page.Count)
+        return await _context.Users
+            .AsQueryable()
+            .AsNoTracking()
+            // .Where(u => createdFrom == null || u.CreatedUtc >= createdFrom)
+            // .Where(u => createdTo == null || u.CreatedUtc <= createdTo)
+            // .Where(u => text == null || EF.Functions.ILike(u.Name, $"%{text.Trim()}%"))
+            // .Where(u => isAdmin == null || u.IsAdmin == isAdmin)
+            // .OrderBy(u => sortBy == null || desc ? $"{sortBy} descending" : sortBy)
+            // .Skip(page * pageSize)
+            // .Take(pageSize)
             .ToArrayAsync(cancellationToken);
     }
 

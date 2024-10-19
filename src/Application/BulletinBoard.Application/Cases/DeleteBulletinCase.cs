@@ -2,14 +2,14 @@
 using BulletinBoard.Application.Abstraction.Repositories;
 using MediatR;
 
-namespace BulletinBoard.Application.Bulletins;
+namespace BulletinBoard.Application.Cases;
 
-public class DeleteBulletinCommandHandler : IRequestHandler<IDeleteBulletinCommand>
+public class DeleteBulletinCase : IRequestHandler<IDeleteBulletinCommand>
 {
     private readonly IBulletinRepository _bulletins;
     private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteBulletinCommandHandler(IBulletinRepository bulletins, IUnitOfWork unitOfWork)
+    public DeleteBulletinCase(IBulletinRepository bulletins, IUnitOfWork unitOfWork)
     {
         _bulletins = bulletins ?? throw new ArgumentNullException(nameof(bulletins));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

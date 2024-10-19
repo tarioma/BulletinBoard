@@ -1,16 +1,16 @@
-﻿using BulletinBoard.Domain.Entities;
+﻿using AutoMapper;
+using BulletinBoard.Domain.Entities;
 using BulletinBoard.WebAPI.Models.Responses;
-using Mapster;
 
 namespace BulletinBoard.WebAPI.MappingProfiles;
 
-public class UserMappingProfile : IRegister
+public class UserMappingProfile : Profile
 {
-    public void Register(TypeAdapterConfig config)
+    public UserMappingProfile()
     {
-        config.NewConfig<User, GetUserByIdResponse>();
+        CreateMap<User, GetUserByIdResponse>();
 
-        config.NewConfig<User[], SearchUsersResponse>()
-            .Map(dest => dest.Users, src => src.Select(u => u.Adapt<GetUserByIdResponse>()).ToArray());
+        CreateMap<User[], SearchUsersResponse>()
+            .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src));
     }
 }

@@ -1,5 +1,4 @@
-﻿using BulletinBoard.Application.Abstraction.Models.SearchFilters;
-using BulletinBoard.Domain.Entities;
+﻿using BulletinBoard.Domain.Entities;
 
 namespace BulletinBoard.Application.Abstraction.Repositories;
 
@@ -9,8 +8,8 @@ public interface IUserRepository
 
     Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<User[]> SearchAsync(PageFilter page, string? text, bool? isAdmin, string? sortBy, bool desc, DateRangeFilters created,
-        CancellationToken cancellationToken = default);
+    Task<User[]> SearchAsync(int page, int pageSize, string? text, bool? isAdmin, string? sortBy, bool desc, DateTime? createdFrom,
+        DateTime? createdTo, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
 

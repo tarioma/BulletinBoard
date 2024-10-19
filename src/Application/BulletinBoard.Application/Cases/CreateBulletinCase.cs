@@ -1,18 +1,18 @@
-﻿using BulletinBoard.Application.Abstraction.Models.Commands;
+﻿using AutoMapper;
+using BulletinBoard.Application.Abstraction.Models.Commands;
 using BulletinBoard.Application.Abstraction.Repositories;
 using BulletinBoard.Domain.Entities;
-using MapsterMapper;
 using MediatR;
 
-namespace BulletinBoard.Application.Bulletins;
+namespace BulletinBoard.Application.Cases;
 
-public class CreateBulletinCommandHandler : IRequestHandler<ICreateBulletinCommand, Guid>
+public class CreateBulletinCase : IRequestHandler<ICreateBulletinCommand, Guid>
 {
     private readonly IBulletinRepository _bulletins;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public CreateBulletinCommandHandler(IBulletinRepository bulletins, IUnitOfWork unitOfWork, IMapper mapper)
+    public CreateBulletinCase(IBulletinRepository bulletins, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _bulletins = bulletins ?? throw new ArgumentNullException(nameof(bulletins));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

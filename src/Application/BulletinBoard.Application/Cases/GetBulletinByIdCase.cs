@@ -3,13 +3,13 @@ using BulletinBoard.Application.Abstraction.Repositories;
 using BulletinBoard.Domain.Entities;
 using MediatR;
 
-namespace BulletinBoard.Application.Bulletins.GetBulletinById;
+namespace BulletinBoard.Application.Cases;
 
-public class GetBulletinByIdQueryHandler : IRequestHandler<IGetBulletinByIdQuery, Bulletin>
+public class GetBulletinByIdCase : IRequestHandler<IGetBulletinByIdQuery, Bulletin>
 {
     private readonly IBulletinRepository _bulletins;
 
-    public GetBulletinByIdQueryHandler(IBulletinRepository bulletins)
+    public GetBulletinByIdCase(IBulletinRepository bulletins)
     {
         _bulletins = bulletins ?? throw new ArgumentNullException(nameof(bulletins));
     }

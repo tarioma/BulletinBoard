@@ -1,9 +1,9 @@
-﻿using BulletinBoard.Application.Abstraction.Models.Commands;
+﻿using AutoMapper;
+using BulletinBoard.Application.Abstraction.Models.Commands;
 using BulletinBoard.Application.Abstraction.Models.Queries;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.WebAPI.Models.Requests;
 using BulletinBoard.WebAPI.Models.Responses;
-using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

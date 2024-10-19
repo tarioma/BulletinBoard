@@ -3,13 +3,13 @@ using BulletinBoard.Application.Abstraction.Repositories;
 using BulletinBoard.Domain.Entities;
 using MediatR;
 
-namespace BulletinBoard.Application.Users;
+namespace BulletinBoard.Application.Cases;
 
-public class SearchUsersQueryHandler : IRequestHandler<ISearchUsersQuery, User[]>
+public class SearchUsersCase : IRequestHandler<ISearchUsersQuery, User[]>
 {
     private readonly IUserRepository _users;
 
-    public SearchUsersQueryHandler(IUserRepository users)
+    public SearchUsersCase(IUserRepository users)
     {
         _users = users ?? throw new ArgumentNullException(nameof(users));
     }
@@ -20,11 +20,13 @@ public class SearchUsersQueryHandler : IRequestHandler<ISearchUsersQuery, User[]
 
         return await _users.SearchAsync(
             request.Page,
+            request.PageSize,
             request.Text,
             request.IsAdmin,
             request.SortBy,
             request.Desc,
-            request.Created,
+            request.CreatedFrom?.UtcDateTime,
+            request.CreatedTo?.UtcDateTime,
             cancellationToken);
     }
 }

@@ -2,5 +2,5 @@
 
 public class SearchUsersResponse
 {
-    public GetUserByIdResponse[] Users { get; init; } = null!;
+    public GetUserByIdResponse[] Users { get; init; } = [];
 }

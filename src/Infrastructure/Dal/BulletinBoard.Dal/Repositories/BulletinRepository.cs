@@ -2,8 +2,6 @@
 using BulletinBoard.Dal.Exceptions;
 using BulletinBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
-using BulletinBoard.Application.Abstraction.Models.SearchFilters;
 
 namespace BulletinBoard.Dal.Repositories;
 
@@ -34,60 +32,22 @@ public class BulletinRepository : IBulletinRepository
                ?? throw new NotFoundException("Объявление с таким id не найдено.");
     }
 
-    public async Task<Bulletin[]> SearchAsync(PageFilter page, int? number, string? text, Guid? userId, string? sortBy, bool desc,
-        DateRangeFilters created, DateRangeFilters expiry, CancellationToken cancellationToken)
+    public async Task<Bulletin[]> SearchAsync(int page, int pageSize, int? number, string? text, Guid? userId, string? sortBy, bool desc,
+        DateTime? createdFrom, DateTime? createdTo, DateTime? expiryFrom, DateTime? expiryTo, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(page);
-        ArgumentNullException.ThrowIfNull(created);
-        ArgumentNullException.ThrowIfNull(expiry);
-
-        var bulletins = _context.Bulletins.AsQueryable().AsNoTracking();
-
-        if (created.From is not null)
-        {
-            bulletins = bulletins.Where(b => b.CreatedUtc >= created.From);
-        }
-
-        if (created.To is not null)
-        {
-            bulletins = bulletins.Where(b => b.CreatedUtc <= created.To);
-        }
-
-        if (expiry.From is not null)
-        {
-            bulletins = bulletins.Where(b => b.ExpiryUtc >= expiry.From);
-        }
-
-        if (expiry.To is not null)
-        {
-            bulletins = bulletins.Where(b => b.ExpiryUtc <= expiry.To);
-        }
-
-        if (number is not null)
-        {
-            bulletins = bulletins.Where(b => b.Number == number);
-        }
-
-        if (text is not null)
-        {
-            bulletins = bulletins.Where(b => EF.Functions.ILike(b.Text, $"%{text.Trim()}%"));
-        }
-
-        if (userId is not null)
-        {
-            bulletins = bulletins.Where(b => b.UserId == userId);
-        }
-
-        if (sortBy is not null)
-        {
-            bulletins = desc
-                ? bulletins.OrderBy($"{sortBy} descending")
-                : bulletins.OrderBy(sortBy);
-        }
-
-        return await bulletins
-            .Skip(page.Offset)
-            .Take(page.Count)
+        return await _context.Bulletins
+            .AsQueryable()
+            .AsNoTracking()
+            .Where(b => createdFrom == null || b.CreatedUtc >= createdFrom)
+            .Where(b => createdTo == null || b.CreatedUtc <= createdTo)
+            .Where(b => expiryFrom == null || b.ExpiryUtc >= expiryFrom)
+            .Where(b => expiryTo == null || b.ExpiryUtc <= expiryTo)
+            .Where(b => number == null || b.Number == number)
+            .Where(b => text == null || EF.Functions.ILike(b.Text, $"%{text.Trim()}%"))
+            .Where(b => userId == null || b.UserId == userId)
+            .OrderBy(u => sortBy == null || desc ? $"{sortBy} descending" : sortBy)
+            .Skip(page * pageSize)
+            .Take(pageSize)
             .ToArrayAsync(cancellationToken);
     }
 

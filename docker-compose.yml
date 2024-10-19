@@ -1,0 +1,28 @@
+﻿services:
+  bulletin_board:
+    image: bulletin_board
+    build:
+      context: .
+      dockerfile: src/Infrastructure/BulletinBoard/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://localhost:5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    container_name: bulletin_board
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 9OQchV5ekIJX_YSQ
+      POSTGRES_DB: bulletin_board
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

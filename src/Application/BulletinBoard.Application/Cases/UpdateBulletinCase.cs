@@ -1,17 +1,17 @@
-﻿using BulletinBoard.Application.Abstraction.Models.Commands;
+﻿using AutoMapper;
+using BulletinBoard.Application.Abstraction.Models.Commands;
 using BulletinBoard.Application.Abstraction.Repositories;
-using MapsterMapper;
 using MediatR;
 
-namespace BulletinBoard.Application.Bulletins.UpdateBulletin;
+namespace BulletinBoard.Application.Cases;
 
-public class UpdateBulletinCommandHandler : IRequestHandler<IUpdateBulletinCommand>
+public class UpdateBulletinCase : IRequestHandler<IUpdateBulletinCommand>
 {
     private readonly IBulletinRepository _bulletins;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public UpdateBulletinCommandHandler(IBulletinRepository bulletins, IUnitOfWork unitOfWork, IMapper mapper)
+    public UpdateBulletinCase(IBulletinRepository bulletins, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _bulletins = bulletins ?? throw new ArgumentNullException(nameof(bulletins));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -23,7 +23,7 @@ public class UpdateBulletinCommandHandler : IRequestHandler<IUpdateBulletinComma
         ArgumentNullException.ThrowIfNull(request);
 
         var bulletin = await _bulletins.GetByIdAsync(request.Id, cancellationToken);
-        _mapper.Map(bulletin, request);
+        _mapper.Map(request, bulletin);
 
         await _bulletins.UpdateAsync(bulletin, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
