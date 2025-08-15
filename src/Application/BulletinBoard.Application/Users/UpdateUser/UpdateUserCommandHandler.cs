@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Specifications;
 using MediatR;
 
 namespace BulletinBoard.Application.Users.UpdateUser;
@@ -13,7 +14,10 @@ public class UpdateUserCommandHandler(
     {
         Guard.Against.Null(request);
 
-        var user = await users.GetByIdAsync(request.Id, cancellationToken);
+        var user = await users.GetByIdAsync(
+            new UserByIdSpecification(request.Id),
+            cancellationToken);
+
         user.SetName(request.Name);
         user.IsAdmin = request.IsAdmin;
 

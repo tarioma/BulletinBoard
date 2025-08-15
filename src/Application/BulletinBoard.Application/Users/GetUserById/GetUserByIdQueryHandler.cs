@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Specifications;
 using BulletinBoard.Domain.Entities;
 using MediatR;
 
@@ -13,6 +14,8 @@ public class GetUserByIdQueryHandler(
     {
         Guard.Against.Null(request);
 
-        return await users.GetByIdAsync(request.Id, cancellationToken);
+        return await users.GetByIdAsync(
+            new UserByIdSpecification(request.Id),
+            cancellationToken);
     }
 }
