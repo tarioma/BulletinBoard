@@ -7,7 +7,8 @@ namespace BulletinBoard.Application.Users.CreateUser;
 
 public class CreateUserCommandHandler(
     IUserRepository users,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateUserCommand, Guid>
+    IUnitOfWork unitOfWork)
+    : IRequestHandler<CreateUserCommand, Guid>
 {
     public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken = default)
     {

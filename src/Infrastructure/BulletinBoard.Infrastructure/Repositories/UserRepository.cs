@@ -1,5 +1,4 @@
-﻿using System.Linq.Dynamic.Core;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using BulletinBoard.Application.Models.Users;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Application.Specifications;
@@ -7,83 +6,130 @@ using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
 using BulletinBoard.Infrastructure.Specifications;
 using Microsoft.EntityFrameworkCore;
-using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
 
-namespace BulletinBoard.Infrastructure.Repositories;
-
-public class UserRepository(DatabaseContext context) : IUserRepository
+namespace BulletinBoard.Infrastructure.Repositories
 {
-    public Task CreateAsync(User user, CancellationToken cancellationToken = default)
+    public sealed class UserRepository : IUserRepository
     {
-        Guard.Against.Null(user);
+        private readonly DatabaseContext _db;
 
-        return Task.FromResult(context.Users.Add(user));
-    }
-
-    public async Task<User> GetByIdAsync(ISpecification<User> specification, CancellationToken cancellationToken = default)
-    {
-        Guard.Against.Null(specification);
-
-        var query = SpecificationEvaluator.GetQuery(context.Users, specification);
-
-        return await query.SingleOrDefaultAsync(cancellationToken)
-               ?? throw new NotFoundException("Пользователь с таким id не найден.");
-    }
-
-    public async Task<IEnumerable<User>> SearchAsync(
-        UsersSearchFilters searchFilters,
-        CancellationToken cancellationToken = default)
-    {
-        Guard.Against.Null(searchFilters);
-
-        var users = context.Users.AsQueryable().AsNoTracking();
-
-        if (searchFilters.Created.To is not null)
+        public UserRepository(DatabaseContext db)
         {
-            users = users.Where(u => u.CreatedUtc >= searchFilters.Created.From);
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
-        if (searchFilters.Created.To is not null)
+        public async Task CreateAsync(User user, CancellationToken cancellationToken)
         {
-            users = users.Where(u => u.CreatedUtc <= searchFilters.Created.To);
+            Guard.Against.Null(user);
+            await _db.Users.AddAsync(user, cancellationToken);
         }
 
-        if (searchFilters.SearchName is not null)
+        public async Task<User> GetByIdAsync(ISpecification<User> specification, CancellationToken cancellationToken)
         {
-            var text = searchFilters.SearchName.Trim();
-            users = users.Where(u => EF.Functions.ILike(u.Name, $"%{text}%"));
+            Guard.Against.Null(specification);
+
+            // Используем общий Evaluator для применения спецификации
+            var query = SpecificationEvaluator.GetQuery(_db.Users, specification);
+
+            // В интерфейсе тип "User" не допускает null — ожидаем единственную запись.
+            return await query.SingleAsync(cancellationToken);
         }
 
-        if (searchFilters.SearchIsAdmin is not null)
+        public async Task<IEnumerable<User>> SearchAsync(UsersSearchFilters filters,
+            CancellationToken cancellationToken)
         {
-            users = users.Where(u => u.IsAdmin == searchFilters.SearchIsAdmin);
+            Guard.Against.Null(filters);
+
+            IQueryable<User> query = _db.Users.AsNoTracking();
+
+            // Фильтр по имени (case-insensitive, постгрес — через ILike; для других провайдеров .ToLower())
+            if (!string.IsNullOrWhiteSpace(filters.SearchName))
+            {
+                var pattern = $"%{filters.SearchName.Trim()}%";
+
+                // Попытка транслировать в ILIKE (работает в Npgsql)
+                if (EF.Functions != null)
+                {
+                    query = query.Where(u => EF.Functions.ILike(u.Name, pattern));
+                }
+                else
+                {
+                    var name = filters.SearchName.Trim().ToLower();
+                    query = query.Where(u => u.Name.ToLower().Contains(name));
+                }
+            }
+
+            // Фильтр по IsAdmin
+            if (filters.SearchIsAdmin.HasValue)
+            {
+                var isAdmin = filters.SearchIsAdmin.Value;
+                query = query.Where(u => u.IsAdmin == isAdmin);
+            }
+
+            // Фильтр по диапазону дат создания
+            if (filters.Created.From.HasValue)
+            {
+                var from = filters.Created.From.Value;
+                query = query.Where(u => u.CreatedUtc >= from);
+            }
+
+            if (filters.Created.To.HasValue)
+            {
+                var to = filters.Created.To.Value;
+                query = query.Where(u => u.CreatedUtc <= to);
+            }
+
+            // Сортировка
+            query = ApplySorting(query, filters.SortBy, filters.Desc);
+
+            // Пагинация
+            query = query
+                .Skip(filters.Page.Offset)
+                .Take(filters.Page.Count);
+
+            return await query.ToListAsync(cancellationToken);
         }
 
-        users = searchFilters.Desc
-            ? users.OrderBy($"{searchFilters.SortBy} descending")
-            : users.OrderBy(searchFilters.SortBy);
-        
-        return await users
-            .Skip(searchFilters.Page.Offset)
-            .Take(searchFilters.Page.Count)
-            .ToArrayAsync(cancellationToken);
-    }
+        public Task UpdateAsync(User user, CancellationToken cancellationToken)
+        {
+            Guard.Against.Null(user);
+            _db.Users.Update(user);
+            return Task.CompletedTask;
+        }
 
-    public Task UpdateAsync(User user, CancellationToken cancellationToken = default)
-    {
-        Guard.Against.Null(user);
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+        {
+            Guard.Against.Default(id);
 
-        context.Update(user);
+            // Без лишней загрузки — можно использовать ExecuteDeleteAsync (EF Core 7+),
+            // но для совместимости удалим через FindAsync.
+            var entity = await _db.Users.FindAsync(new object[] { id }, cancellationToken);
+            if (entity is null)
+            {
+                throw new KeyNotFoundException($"Пользователь с идентификатором '{id}' не найден.");
+            }
 
-        return Task.CompletedTask;
-    }
+            _db.Users.Remove(entity);
+        }
 
-    public Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        Guard.Against.Default(id);
+        private static IQueryable<User> ApplySorting(IQueryable<User> query, string sortBy, bool desc)
+        {
+            // Значения приходят из UsersSearchFilters.SortOptions:
+            // CreatedUtc, Name, IsAdmin
+            return sortBy switch
+            {
+                nameof(User.Name) => desc
+                    ? query.OrderByDescending(u => u.Name).ThenByDescending(u => u.CreatedUtc)
+                    : query.OrderBy(u => u.Name).ThenBy(u => u.CreatedUtc),
 
-        context.Users.Where(u => u.Id == id).ExecuteDelete();
+                nameof(User.IsAdmin) => desc
+                    ? query.OrderByDescending(u => u.IsAdmin).ThenByDescending(u => u.CreatedUtc)
+                    : query.OrderBy(u => u.IsAdmin).ThenBy(u => u.CreatedUtc),
 
-        return Task.CompletedTask;
+                _ => desc
+                    ? query.OrderByDescending(u => u.CreatedUtc)
+                    : query.OrderBy(u => u.CreatedUtc),
+            };
+        }
     }
 }
