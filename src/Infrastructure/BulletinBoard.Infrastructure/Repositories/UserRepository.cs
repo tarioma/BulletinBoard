@@ -4,30 +4,25 @@ using BulletinBoard.Application.Models.Users;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
-using BulletinBoard.Infrastructure.Repositories.Common;
 using Microsoft.EntityFrameworkCore;
 using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
 
 namespace BulletinBoard.Infrastructure.Repositories;
 
-public class UserRepository : BaseRepository, IUserRepository
+public class UserRepository(DatabaseContext context) : IUserRepository
 {
-    public UserRepository(DatabaseContext context) : base(context)
-    {
-    }
-
     public Task CreateAsync(User user, CancellationToken cancellationToken = default)
     {
         Guard.Against.Null(user);
 
-        return Task.FromResult(Context.Users.Add(user));
+        return Task.FromResult(context.Users.Add(user));
     }
 
     public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         Guard.Against.Default(id);
 
-        return await Context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
+        return await context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
                ?? throw new NotFoundException("Пользователь с таким id не найден.");
     }
 
@@ -37,7 +32,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Null(searchFilters);
 
-        var users = Context.Users.AsQueryable().AsNoTracking();
+        var users = context.Users.AsQueryable().AsNoTracking();
 
         if (searchFilters.Created.To is not null)
         {
@@ -74,7 +69,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Null(user);
 
-        Context.Update(user);
+        context.Update(user);
 
         return Task.CompletedTask;
     }
@@ -83,7 +78,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Default(id);
 
-        Context.Users.Where(u => u.Id == id).ExecuteDelete();
+        context.Users.Where(u => u.Id == id).ExecuteDelete();
 
         return Task.CompletedTask;
     }

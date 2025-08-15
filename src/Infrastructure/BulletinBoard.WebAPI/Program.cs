@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<IBulletinRepository, BulletinRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITenantFactory, TenantFactory>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddSingleton<IImageService, ImageService>();
 builder.Services.Configure<BulletinsConfigurationOptions>(
     builder.Configuration.GetSection("BulletinsConfigurationOptions"));

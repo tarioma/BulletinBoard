@@ -4,30 +4,25 @@ using BulletinBoard.Application.Models.Bulletins;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
-using BulletinBoard.Infrastructure.Repositories.Common;
 using Microsoft.EntityFrameworkCore;
 using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
 
 namespace BulletinBoard.Infrastructure.Repositories;
 
-public class BulletinRepository : BaseRepository, IBulletinRepository
+public class BulletinRepository(DatabaseContext context) : IBulletinRepository
 {
-    public BulletinRepository(DatabaseContext context) : base(context)
-    {
-    }
-
     public Task CreateAsync(Bulletin bulletin, CancellationToken cancellationToken = default)
     {
         Guard.Against.Null(bulletin);
 
-        return Task.FromResult(Context.Bulletins.Add(bulletin));
+        return Task.FromResult(context.Bulletins.Add(bulletin));
     }
 
     public async Task<Bulletin> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         Guard.Against.Default(id);
 
-        return await Context.Bulletins.AsNoTracking().SingleOrDefaultAsync(b => b.Id == id, cancellationToken)
+        return await context.Bulletins.AsNoTracking().SingleOrDefaultAsync(b => b.Id == id, cancellationToken)
                ?? throw new NotFoundException("Объявление с таким id не найдено.");
     }
 
@@ -37,7 +32,7 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
     {
         Guard.Against.Null(searchFilters);
 
-        var bulletins = Context.Bulletins.AsQueryable().AsNoTracking();
+        var bulletins = context.Bulletins.AsQueryable().AsNoTracking();
 
         if (searchFilters.Rating.From is not null)
         {
@@ -99,14 +94,14 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
     {
         Guard.Against.Default(userId);
 
-        return Context.Bulletins.Where(b => b.UserId == userId).CountAsync(cancellationToken);
+        return context.Bulletins.Where(b => b.UserId == userId).CountAsync(cancellationToken);
     }
 
     public Task UpdateAsync(Bulletin bulletin, CancellationToken cancellationToken = default)
     {
         Guard.Against.Null(bulletin);
 
-        Context.Update(bulletin);
+        context.Update(bulletin);
 
         return Task.CompletedTask;
     }
@@ -115,7 +110,7 @@ public class BulletinRepository : BaseRepository, IBulletinRepository
     {
         Guard.Against.Default(id);
 
-        Context.Bulletins.Where(u => u.Id == id).ExecuteDelete();
+        context.Bulletins.Where(u => u.Id == id).ExecuteDelete();
 
         return Task.CompletedTask;
     }

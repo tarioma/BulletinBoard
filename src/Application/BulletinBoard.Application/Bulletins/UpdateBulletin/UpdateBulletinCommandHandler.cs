@@ -1,34 +1,25 @@
 ﻿using Ardalis.GuardClauses;
-using BulletinBoard.Application.Common;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Application.Services;
 using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.UpdateBulletin;
 
-public class UpdateBulletinCommandHandler : BaseHandler, IRequestHandler<UpdateBulletinCommand>
+public class UpdateBulletinCommandHandler(
+    IBulletinRepository bulletins,
+    IUnitOfWork unitOfWork,
+    IImageService imageService) : IRequestHandler<UpdateBulletinCommand>
 {
-    private readonly IImageService _imageService;
-
-    public UpdateBulletinCommandHandler(ITenantFactory tenantFactory, IImageService imageService) : base(tenantFactory)
-    {
-        Guard.Against.Null(imageService);
-
-        _imageService = imageService;
-    }
-
     public async Task Handle(UpdateBulletinCommand request, CancellationToken cancellationToken = default)
     {
         Guard.Against.Null(request);
 
-        var tenant = TenantFactory.GetTenant();
-
-        var bulletin = await tenant.Bulletins.GetByIdAsync(request.Id, cancellationToken);
+        var bulletin = await bulletins.GetByIdAsync(request.Id, cancellationToken);
 
         if (request.ImageStream is not null && request.ImageExtension is not null)
         {
             var newImage = request.ImageStream is not null && request.ImageExtension is not null
-                ? await _imageService.SaveImageAsync(
+                ? await imageService.SaveImageAsync(
                     request.ImageStream,
                     request.ImageExtension,
                     cancellationToken)
@@ -38,7 +29,7 @@ public class UpdateBulletinCommandHandler : BaseHandler, IRequestHandler<UpdateB
 
             if (bulletin.Image is not null)
             {
-                await _imageService.DeleteImageAsync(bulletin.Image, cancellationToken);
+                await imageService.DeleteImageAsync(bulletin.Image, cancellationToken);
             }
         }
 
@@ -46,7 +37,7 @@ public class UpdateBulletinCommandHandler : BaseHandler, IRequestHandler<UpdateB
         bulletin.Rating = request.Rating;
         bulletin.SetExpiryUtc(request.ExpiryUtc);
 
-        await tenant.Bulletins.UpdateAsync(bulletin, cancellationToken);
-        await tenant.CommitAsync(cancellationToken);
+        await bulletins.UpdateAsync(bulletin, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
