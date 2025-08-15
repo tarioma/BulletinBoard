@@ -13,7 +13,9 @@ public abstract class BaseEntity
         CreatedUtc = createdUtc;
     }
 
-    protected BaseEntity() { }
+    protected BaseEntity()
+    {
+    }
 
     public Guid Id { get; }
     public DateTime CreatedUtc { get; }

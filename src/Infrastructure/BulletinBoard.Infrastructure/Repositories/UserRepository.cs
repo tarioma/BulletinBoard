@@ -2,32 +2,31 @@
 using Ardalis.GuardClauses;
 using BulletinBoard.Application.Models.Users;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Specifications;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
-using BulletinBoard.Infrastructure.Repositories.Common;
+using BulletinBoard.Infrastructure.Specifications;
 using Microsoft.EntityFrameworkCore;
 using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
 
 namespace BulletinBoard.Infrastructure.Repositories;
 
-public class UserRepository : BaseRepository, IUserRepository
+public class UserRepository(DatabaseContext context) : IUserRepository
 {
-    public UserRepository(DatabaseContext context) : base(context)
-    {
-    }
-
     public Task CreateAsync(User user, CancellationToken cancellationToken = default)
     {
         Guard.Against.Null(user);
 
-        return Task.FromResult(Context.Users.Add(user));
+        return Task.FromResult(context.Users.Add(user));
     }
 
-    public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User> GetByIdAsync(ISpecification<User> specification, CancellationToken cancellationToken = default)
     {
-        Guard.Against.Default(id);
+        Guard.Against.Null(specification);
 
-        return await Context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
+        var query = SpecificationEvaluator.GetQuery(context.Users, specification);
+
+        return await query.SingleOrDefaultAsync(cancellationToken)
                ?? throw new NotFoundException("Пользователь с таким id не найден.");
     }
 
@@ -37,7 +36,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Null(searchFilters);
 
-        var users = Context.Users.AsQueryable().AsNoTracking();
+        var users = context.Users.AsQueryable().AsNoTracking();
 
         if (searchFilters.Created.To is not null)
         {
@@ -74,7 +73,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Null(user);
 
-        Context.Update(user);
+        context.Update(user);
 
         return Task.CompletedTask;
     }
@@ -83,7 +82,7 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         Guard.Against.Default(id);
 
-        Context.Users.Where(u => u.Id == id).ExecuteDelete();
+        context.Users.Where(u => u.Id == id).ExecuteDelete();
 
         return Task.CompletedTask;
     }
