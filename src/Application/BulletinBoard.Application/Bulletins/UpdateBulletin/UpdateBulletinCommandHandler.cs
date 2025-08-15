@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using BulletinBoard.Application.Repositories;
 using BulletinBoard.Application.Services;
+using BulletinBoard.Application.Specifications;
 using MediatR;
 
 namespace BulletinBoard.Application.Bulletins.UpdateBulletin;
@@ -14,7 +15,9 @@ public class UpdateBulletinCommandHandler(
     {
         Guard.Against.Null(request);
 
-        var bulletin = await bulletins.GetByIdAsync(request.Id, cancellationToken);
+        var bulletin = await bulletins.GetByIdAsync(
+            new BulletinByIdSpecification(request.Id),
+            cancellationToken);
 
         if (request.ImageStream is not null && request.ImageExtension is not null)
         {

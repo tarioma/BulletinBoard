@@ -2,8 +2,10 @@
 using Ardalis.GuardClauses;
 using BulletinBoard.Application.Models.Bulletins;
 using BulletinBoard.Application.Repositories;
+using BulletinBoard.Application.Specifications;
 using BulletinBoard.Domain.Entities;
 using BulletinBoard.Infrastructure.Context;
+using BulletinBoard.Infrastructure.Specifications;
 using Microsoft.EntityFrameworkCore;
 using NotFoundException = BulletinBoard.Infrastructure.Exceptions.NotFoundException;
 
@@ -18,11 +20,13 @@ public class BulletinRepository(DatabaseContext context) : IBulletinRepository
         return Task.FromResult(context.Bulletins.Add(bulletin));
     }
 
-    public async Task<Bulletin> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Bulletin> GetByIdAsync(ISpecification<Bulletin> specification, CancellationToken cancellationToken = default)
     {
-        Guard.Against.Default(id);
+        Guard.Against.Null(specification);
 
-        return await context.Bulletins.AsNoTracking().SingleOrDefaultAsync(b => b.Id == id, cancellationToken)
+        var query = SpecificationEvaluator.GetQuery(context.Bulletins, specification);
+
+        return await query.SingleOrDefaultAsync(cancellationToken)
                ?? throw new NotFoundException("Объявление с таким id не найдено.");
     }
 
